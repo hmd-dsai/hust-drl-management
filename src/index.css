@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Để ô chọn, ô nhập, thanh cuộn gốc của trình duyệt cũng theo nền sáng/tối của hệ điều hành. */
+:root {
+  color-scheme: light dark;
+}

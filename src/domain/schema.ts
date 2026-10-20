@@ -23,14 +23,31 @@ export function validateUserDataJson(data: unknown): ParseResult<UserData> {
   return run(validateUserDataSchema, data)
 }
 
-/** Parse chuỗi JSON (ví dụ nội dung file tải lên), báo lỗi tiếng Việt nếu cú pháp hỏng. */
+/** Parse chuỗi JSON (ví dụ nội dung file tải lên), báo lỗi cú pháp bằng tiếng Việt, kèm dòng/cột nếu biết. */
 export function parseJsonText(text: string): ParseResult<unknown> {
+  if (text.trim() === '') return { ok: false, errors: ['File rỗng, không có nội dung JSON.'] }
   try {
     return { ok: true, value: JSON.parse(text) as unknown }
   } catch (e) {
-    const detail = e instanceof Error ? e.message : String(e)
-    return { ok: false, errors: [`File không phải JSON hợp lệ: ${detail}`] }
+    return { ok: false, errors: [`File không phải JSON hợp lệ: ${describeSyntaxError(text, e instanceof Error ? e.message : String(e))}`] }
   }
+}
+
+const SYNTAX_HINT = 'Kiểm tra dấu phẩy, dấu ngoặc và dấu nháy kép quanh tên trường.'
+
+/** Thông báo của JSON.parse khác nhau giữa các trình duyệt; lấy dòng/cột nếu có, còn lại dùng câu chung. */
+function describeSyntaxError(text: string, message: string): string {
+  const lc = /line (\d+) column (\d+)/.exec(message)
+  if (lc) return `lỗi cú pháp ở dòng ${lc[1]}, cột ${lc[2]}. ${SYNTAX_HINT}`
+  const pos = /position (\d+)/.exec(message)
+  if (pos) {
+    const before = text.slice(0, Number(pos[1])).split('\n')
+    return `lỗi cú pháp ở dòng ${before.length}, cột ${before[before.length - 1]!.length + 1}. ${SYNTAX_HINT}`
+  }
+  if (/end of (JSON|data)|unexpected end/i.test(message)) return 'file bị cắt ngang, thiếu dấu đóng } hoặc ].'
+  const token = /Unexpected token '(.+?)'/.exec(message)
+  if (token) return `có ký tự không mong đợi "${token[1]}". ${SYNTAX_HINT}`
+  return `lỗi cú pháp. ${SYNTAX_HINT}`
 }
 
 function run<T>(validate: ValidateFunction<T>, data: unknown): ParseResult<T> {

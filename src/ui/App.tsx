@@ -16,7 +16,8 @@ import { ImportDialog, type ImportState } from './ImportDialog.tsx'
 import { NewDataDialog } from './NewDataDialog.tsx'
 import { StatusScreen } from './StatusScreen.tsx'
 import { SuggestScreen } from './SuggestScreen.tsx'
-import { TopBar, type Tab } from './TopBar.tsx'
+import { ShortcutsDialog } from './ShortcutsDialog.tsx'
+import { TABS, TopBar, type Tab } from './TopBar.tsx'
 import { Welcome } from './Welcome.tsx'
 
 const store = createDraftStore(browserStorage())
@@ -39,6 +40,7 @@ export function App() {
   const { doc } = state
   const [importState, setImportState] = useState<ImportState | null>(null)
   const [showNew, setShowNew] = useState(false)
+  const [showKeys, setShowKeys] = useState(false)
   const [saveFailed, setSaveFailed] = useState(false)
   const [dragging, setDragging] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
@@ -143,15 +145,28 @@ export function App() {
     }
   }, [readFile])
 
-  // ---- Phím tắt ----
+  // ---- Phím tắt (xem ShortcutsDialog) ----
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const typing = isEditable(e.target)
+      const dialogOpen = document.querySelector('dialog[open]') !== null
+      if (e.altKey && !e.ctrlKey && !e.metaKey && /^Digit[1-3]$/.test(e.code)) {
+        if (typing || dialogOpen || !doc) return
+        e.preventDefault()
+        window.location.hash = TAB_HASH[TABS[Number(e.code.slice(-1)) - 1]!.id]
+        return
+      }
+      if (e.key === '?' && !typing && !dialogOpen) {
+        e.preventDefault()
+        setShowKeys(true)
+        return
+      }
       if (!(e.ctrlKey || e.metaKey) || e.altKey) return
       const key = e.key.toLowerCase()
       if (key === 's') {
         e.preventDefault()
         download()
-      } else if (!isEditable(e.target) && !document.querySelector('dialog[open]')) {
+      } else if (!typing && !dialogOpen) {
         if (key === 'z') {
           e.preventDefault()
           dispatch({ type: e.shiftKey ? 'redo' : 'undo' })
@@ -163,7 +178,7 @@ export function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [download])
+  }, [download, doc])
 
   // ---- Dữ liệu theo học kỳ ----
   const dataFor = (semester: string): UserData | null =>
@@ -200,6 +215,7 @@ export function App() {
           onNew={() => setShowNew(true)}
           tab={tab}
           onTab={(t) => (window.location.hash = TAB_HASH[t])}
+          onShortcuts={() => setShowKeys(true)}
         />
       )}
 
@@ -212,6 +228,7 @@ export function App() {
       {!doc ? null : tab === 'status' ? (
         <StatusScreen
           data={doc.data}
+          onAddActivity={() => (window.location.hash = TAB_HASH.activities)}
           onToggleExcluded={(id) =>
             dispatch({
               type: 'edit',
@@ -267,6 +284,8 @@ export function App() {
           }}
         />
       )}
+
+      {showKeys && <ShortcutsDialog onClose={() => setShowKeys(false)} />}
 
       {showNew && (
         <NewDataDialog

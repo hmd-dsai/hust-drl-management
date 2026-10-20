@@ -3,7 +3,7 @@ import { btn } from './Dialog.tsx'
 
 export type Tab = 'status' | 'activities' | 'suggest'
 
-const TABS: { id: Tab; label: string }[] = [
+export const TABS: { id: Tab; label: string }[] = [
   { id: 'status', label: 'Trạng thái ĐRL' },
   { id: 'activities', label: 'Hoạt động' },
   { id: 'suggest', label: 'Gợi ý' },
@@ -24,6 +24,7 @@ interface Props {
   onNew: () => void
   tab: Tab
   onTab: (tab: Tab) => void
+  onShortcuts: () => void
 }
 
 /** Thanh trên cùng (SPEC mục 7.1). */
@@ -77,6 +78,10 @@ export function TopBar(p: Props) {
           </button>
           <button type="button" className={btn.secondary} onClick={p.onNew}>
             Tạo dữ liệu mới
+          </button>
+          <button type="button" className={btn.secondary} onClick={p.onShortcuts} title="Phím tắt (?)">
+            <span aria-hidden>?</span>
+            <span className="sr-only">Phím tắt</span>
           </button>
         </nav>
       </div>

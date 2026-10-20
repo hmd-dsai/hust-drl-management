@@ -145,7 +145,12 @@ function Result({ res, name, activity, onEdit }: ResultProps) {
         })}
       </dl>
 
-      {res.changes.length === 0 ? (
+      {Object.keys(res.assignment).length === 0 ? (
+        <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+          Chưa có hoạt động nào để gợi ý. Chỉ hoạt động dự định hoặc đã tham gia (chưa ghim) mới được đổi tiêu chí; thêm
+          chúng ở màn hình Hoạt động.
+        </p>
+      ) : res.changes.length === 0 ? (
         <p className="rounded-md bg-green-50 p-3 text-sm text-green-900 dark:bg-green-400/10 dark:text-green-200">
           ✓ Cách gán hiện tại đã tốt nhất, không cần đổi gì.
         </p>

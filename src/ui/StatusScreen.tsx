@@ -6,12 +6,14 @@ import { criterionInfo, fullAt, scoreNodes, type CriterionInfo } from '../domain
 import { resolveRubric } from '../domain/rubric.ts'
 import { computeScenarios, SCENARIO_KEYS, SCENARIOS, type ScenarioKey } from '../domain/scoring.ts'
 import type { Category, Criterion, Group, UserData } from '../domain/types.ts'
+import { btn } from './Dialog.tsx'
 import { StackedBar } from './StackedBar.tsx'
 import { SCENARIO_META, STATUS_META } from './status.ts'
 
 interface Props {
   data: UserData
   onToggleExcluded: (criterionId: string) => void
+  onAddActivity: () => void
 }
 
 type Values = Record<ScenarioKey, number>
@@ -22,7 +24,7 @@ const FULL_TITLE: Record<ScenarioKey, string> = {
   projected: 'Sẽ đầy nếu làm hết kế hoạch',
 }
 
-export function StatusScreen({ data, onToggleExcluded }: Props) {
+export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
   const rubric = resolveRubric(data)
   const scores = useMemo(() => computeScenarios(rubric, data), [rubric, data])
   const nodes = useMemo(() => scoreNodes(scores), [scores])
@@ -47,6 +49,18 @@ export function StatusScreen({ data, onToggleExcluded }: Props) {
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-6">
+      {data.activities.length === 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-sky-50 p-4 text-sm text-sky-900 dark:bg-sky-400/10 dark:text-sky-100">
+          <span>
+            Chưa có hoạt động nào. Thêm hoạt động đã làm hoặc định làm để xem điểm. Tiêu chí nào biết chắc không đạt
+            được thì bấm vào nó ở cây chi tiết bên dưới để đánh dấu loại trừ.
+          </span>
+          <button type="button" className={btn.primary} onClick={onAddActivity}>
+            Thêm hoạt động
+          </button>
+        </div>
+      )}
+
       {/* ---- Thẻ tổng ---- */}
       <section aria-labelledby="tong-diem">
         <h2 id="tong-diem" className="sr-only">
@@ -110,7 +124,13 @@ export function StatusScreen({ data, onToggleExcluded }: Props) {
                     <button
                       type="button"
                       className="text-left hover:underline"
-                      onClick={() => document.getElementById(`muc-${cat.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+                      onClick={() => {
+                        const el = document.getElementById(`muc-${cat.id}`) as HTMLDetailsElement | null
+                        if (el) {
+                          el.open = true
+                          el.scrollIntoView({ behavior: 'smooth' })
+                        }
+                      }}
                     >
                       <span className="font-mono">{cat.id}</span>. {cat.name}
                     </button>
@@ -151,14 +171,17 @@ export function StatusScreen({ data, onToggleExcluded }: Props) {
             const groups = visibleGroups(cat)
             const penalty = cat.kind === 'penalty'
             return (
-              <div key={cat.id} id={`muc-${cat.id}`} className="scroll-mt-28">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <details key={cat.id} id={`muc-${cat.id}`} open className="group/cat scroll-mt-28">
+                <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1 [&::-webkit-details-marker]:hidden">
+                  <span aria-hidden className="inline-block w-3 text-slate-400 transition-transform group-open/cat:rotate-90">
+                    ▸
+                  </span>
                   <h3 className="font-semibold">
                     <span className="font-mono">{cat.id}</span>. {cat.name}
                   </h3>
                   <Trio values={values(cat.id)} max={cat.max} />
                   {!penalty && <Tags at={fullAt(nodes, cat.id)} wasted={wasted(cat.id)} />}
-                </div>
+                </summary>
                 {groups.length === 0 ? (
                   <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Không có nhóm nào khớp bộ lọc.</p>
                 ) : (
@@ -192,7 +215,7 @@ export function StatusScreen({ data, onToggleExcluded }: Props) {
                     ))}
                   </div>
                 )}
-              </div>
+              </details>
             )
           })}
         </div>

@@ -57,10 +57,15 @@ describe('parseJsonText', () => {
     expect(parseJsonText('{"a":1}')).toEqual({ ok: true, value: { a: 1 } })
   })
 
-  it('báo lỗi tiếng Việt khi file hỏng cú pháp', () => {
-    const res = parseJsonText('{"semester": "2026.1",')
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.errors[0]).toMatch(/^File không phải JSON hợp lệ: /)
+  it.each([
+    ['', 'File rỗng, không có nội dung JSON.'],
+    ['   \n', 'File rỗng, không có nội dung JSON.'],
+    ['{\n  "a": 1\n  "b": 2\n}', 'File không phải JSON hợp lệ: lỗi cú pháp ở dòng 3, cột 3. Kiểm tra dấu phẩy, dấu ngoặc và dấu nháy kép quanh tên trường.'],
+    ['{"a": 1,}', 'File không phải JSON hợp lệ: lỗi cú pháp ở dòng 1, cột 9. Kiểm tra dấu phẩy, dấu ngoặc và dấu nháy kép quanh tên trường.'],
+    ['{"semester": ', 'File không phải JSON hợp lệ: file bị cắt ngang, thiếu dấu đóng } hoặc ].'],
+    ['đây không phải JSON', 'File không phải JSON hợp lệ: có ký tự không mong đợi "đ". Kiểm tra dấu phẩy, dấu ngoặc và dấu nháy kép quanh tên trường.'],
+  ])('báo lỗi cú pháp tiếng Việt: %j', (text, message) => {
+    expect(parseJsonText(text)).toEqual({ ok: false, errors: [message] })
   })
 })
 
