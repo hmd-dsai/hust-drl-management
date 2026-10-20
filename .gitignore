@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vite/
+coverage/
+*.local
+.env*
+.DS_Store
+# dữ liệu cá nhân xuất từ app (nếu lỡ lưu vào repo)
+drl-*.json

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rubric.schema.json",
+  "title": "DRL Rubric",
+  "description": "Bộ tiêu chí đánh giá điểm rèn luyện của một học kỳ. Dùng chung cho mọi sinh viên. Cấu trúc 3 tầng: category (mục lớn) > group (nhóm) > criterion (tiêu chí).",
+  "type": "object",
+  "required": ["schemaVersion", "id", "name", "totalMax", "categories"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": {
+      "description": "Học kỳ ĐẦU TIÊN áp dụng rubric này, ví dụ 2026.1. Trùng với tên file. Một học kỳ dùng rubric có id lớn nhất mà ≤ học kỳ đó (2025.2 → rubric 2025.1).",
+      "type": "string",
+      "pattern": "^\\d{4}\\.[1-3]$"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "totalMax": {
+      "description": "Trần tổng điểm của các mục cộng điểm (thường là 100).",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "source": {
+      "description": "Nguồn văn bản quy định (URL hoặc số quyết định), không bắt buộc.",
+      "type": "string"
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/category" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z]+(\\.[0-9]+(\\.[a-z]+)?)?$",
+      "description": "Mã phân cấp: 'II' (mục), 'II.3' (nhóm), 'II.3.b' (tiêu chí). Mã của con phải bắt đầu bằng mã của cha."
+    },
+    "category": {
+      "type": "object",
+      "required": ["id", "name", "max", "groups"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "description": "'bonus' (mặc định): điểm dương, max là trần trên. 'penalty': điểm âm, max là trần dưới (ví dụ -110).",
+          "enum": ["bonus", "penalty"],
+          "default": "bonus"
+        },
+        "max": { "type": "number" },
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/group" }
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": ["id", "name", "max", "criteria"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "max": { "type": "number" },
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/criterion" }
+        }
+      }
+    },
+    "criterion": {
+      "type": "object",
+      "required": ["id", "name", "points"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "points": { "type": "number" },
+        "exclusiveGroup": {
+          "description": "Các tiêu chí trong cùng nhóm có cùng khoá này là các mức loại trừ nhau (ví dụ cán bộ lớp xuất sắc/tốt/hoàn thành): chỉ tiêu chí có |points| lớn nhất được tính.",
+          "type": "string"
+        },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

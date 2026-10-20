@@ -1,0 +1,438 @@
+{
+  "$schema": "../../schema/rubric.schema.json",
+  "schemaVersion": 1,
+  "id": "2025.1",
+  "name": "Tiêu chí đánh giá điểm rèn luyện HUST (áp dụng từ 2025.1 đến 2025.2)",
+  "totalMax": 100,
+  "categories": [
+    {
+      "id": "I",
+      "name": "Điểm học tập",
+      "max": 30,
+      "groups": [
+        {
+          "id": "I.1",
+          "name": "Kết quả học tập có điểm trung bình năm học",
+          "max": 24,
+          "criteria": [
+            {
+              "id": "I.1.a",
+              "name": "Có kết quả học tập ở mức: GPA ≥ 3.6",
+              "points": 20,
+              "exclusiveGroup": "gpa-level"
+            },
+            {
+              "id": "I.1.b",
+              "name": "Có kết quả học tập ở mức: 3.2 ≤ GPA < 3.6",
+              "points": 18,
+              "exclusiveGroup": "gpa-level"
+            },
+            {
+              "id": "I.1.c",
+              "name": "Có kết quả học tập ở mức: 2.5 ≤ GPA < 3.2",
+              "points": 16,
+              "exclusiveGroup": "gpa-level"
+            },
+            {
+              "id": "I.1.d",
+              "name": "Có kết quả học tập ở mức: 2.0 ≤ GPA < 2.5",
+              "points": 14,
+              "exclusiveGroup": "gpa-level"
+            },
+            {
+              "id": "I.1.e",
+              "name": "Có kết quả học tập ở mức: 1.5 ≤ GPA < 2.0",
+              "points": 12,
+              "exclusiveGroup": "gpa-level"
+            },
+            {
+              "id": "I.1.f",
+              "name": "Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6)",
+              "points": 8
+            }
+          ]
+        },
+        {
+          "id": "I.2",
+          "name": "Trình độ ngoại ngữ",
+          "max": 6,
+          "criteria": [
+            {
+              "id": "I.2.a",
+              "name": "Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo",
+              "points": 4
+            },
+            {
+              "id": "I.2.b",
+              "name": "Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên",
+              "points": 2
+            }
+          ]
+        },
+        {
+          "id": "I.3",
+          "name": "Tham gia các hoạt động học thuật",
+          "max": 9,
+          "criteria": [
+            {
+              "id": "I.3.a",
+              "name": "Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn",
+              "points": 3
+            },
+            {
+              "id": "I.3.b",
+              "name": "Tham gia công bố khoa học tại hội nghị hoặc tạp chí khoa học chuyên ngành",
+              "points": 6
+            },
+            {
+              "id": "I.3.c",
+              "name": "Thành viên CLB học thuật, lab nghiên cứu, nhóm nghiên cứu, nhóm khởi nghiệp",
+              "points": 6
+            },
+            {
+              "id": "I.3.d",
+              "name": "Tham gia các cuộc thi Olympic cấp đại học, cấp quốc gia, quốc tế",
+              "points": 6
+            },
+            {
+              "id": "I.3.e",
+              "name": "Tham gia khoá đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "I.4",
+          "name": "Có kế hoạch học tập phù hợp",
+          "max": 6,
+          "criteria": [
+            {
+              "id": "I.4.a",
+              "name": "Có kế hoạch học tập và rèn luyện phù hợp được thầy cô ghi nhận",
+              "points": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "name": "Điểm về tổ chức ý thức kỷ luật",
+      "max": 25,
+      "groups": [
+        {
+          "id": "II.1",
+          "name": "Tham gia các hoạt động bắt buộc",
+          "max": 20,
+          "criteria": [
+            {
+              "id": "II.1.a",
+              "name": "Tham gia Sinh hoạt công dân do nhà trường tổ chức",
+              "points": 7
+            },
+            {
+              "id": "II.1.b",
+              "name": "Tham gia Họp lớp thường kỳ do Trường thuộc/Viện/Khoa tổ chức",
+              "points": 7
+            },
+            {
+              "id": "II.1.c",
+              "name": "Nắm vững quy định và quy chế của nhà trường",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "II.2",
+          "name": "Tham gia các hoạt động bổ trợ",
+          "max": 9,
+          "criteria": [
+            {
+              "id": "II.2.a",
+              "name": "Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp",
+              "points": 6
+            },
+            {
+              "id": "II.2.b",
+              "name": "Tham gia hội thảo tăng cường kỹ năng mềm, phương pháp học tập, ý thức học tập, làm việc",
+              "points": 3
+            },
+            {
+              "id": "II.2.c",
+              "name": "Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội",
+              "points": 3
+            },
+            {
+              "id": "II.2.d",
+              "name": "Tham gia hoạt động hướng nghiệp, tìm kiếm thông tin việc làm",
+              "points": 3
+            },
+            {
+              "id": "II.2.e",
+              "name": "Tham gia khoá đào tạo kỹ năng mềm",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "II.3",
+          "name": "Có ý thức tuân thủ kỷ luật học tập",
+          "max": 9,
+          "criteria": [
+            {
+              "id": "II.3.a",
+              "name": "Không bị cấm thi của tất cả các học phần trong kỳ học",
+              "points": 6
+            },
+            {
+              "id": "II.3.b",
+              "name": "Có tổng thời gian tự học tại thư viện, phòng tự học, hệ thống học tập trực tuyến... được các đơn vị ghi nhận tối thiểu 160 giờ/kỳ",
+              "points": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "III",
+      "name": "Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao",
+      "max": 25,
+      "groups": [
+        {
+          "id": "III.1",
+          "name": "Tham gia các hoạt động phong trào văn hoá, thể thao",
+          "max": 10,
+          "criteria": [
+            {
+              "id": "III.1.a",
+              "name": "Tham gia các cuộc thi biểu diễn văn hoá văn nghệ được tổ chức bởi các đơn vị hợp pháp (hát, múa, nhảy, đàn, sáo, vẽ tranh,...)",
+              "points": 6
+            },
+            {
+              "id": "III.1.b",
+              "name": "Tham gia các giải thể thao được tổ chức bởi các đơn vị hợp pháp (các môn thể thao chính thức như: chạy, bóng đá, cờ vua, bóng chuyền,...)",
+              "points": 6
+            },
+            {
+              "id": "III.1.c",
+              "name": "Tham gia các hoạt động phổ biến, tìm hiểu bản sắc văn hoá dân tộc, văn hoá địa phương, văn hoá trường học,...",
+              "points": 3
+            },
+            {
+              "id": "III.1.d",
+              "name": "Tham gia các hoạt động thể dục nâng cao sức khoẻ được tổ chức bởi các đơn vị hợp pháp",
+              "points": 4
+            },
+            {
+              "id": "III.1.e",
+              "name": "Tham gia cổ vũ các hoạt động phong trào văn hoá, thể thao",
+              "points": 3
+            },
+            {
+              "id": "III.1.f",
+              "name": "Thành viên CLB/ tổ/ đội/ nhóm sinh viên hợp pháp, hoạt động về văn nghệ, thể thao, tình nguyện, sở thích",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "III.2",
+          "name": "Tham gia các hoạt động chính trị - xã hội",
+          "max": 12,
+          "criteria": [
+            {
+              "id": "III.2.a",
+              "name": "Tham gia hoạt động tình nguyện (mùa hè xanh, tình nguyện tại chỗ, cổng trường ATGT)",
+              "points": 3
+            },
+            {
+              "id": "III.2.b",
+              "name": "Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tuổi trẻ Bách Khoa Nhân ái\"",
+              "points": 3
+            },
+            {
+              "id": "III.2.c",
+              "name": "Tham gia hiến máu nhân đạo do trường và các tổ chức hợp pháp phát động, tổ chức",
+              "points": 6
+            },
+            {
+              "id": "III.2.d",
+              "name": "Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Đại học, Trường thuộc/ Viện/ Khoa",
+              "points": 3
+            },
+            {
+              "id": "III.2.e",
+              "name": "Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhân",
+              "points": 3
+            },
+            {
+              "id": "III.2.f",
+              "name": "Tham gia Đội tình nguyện hợp pháp trong và ngoài trường, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\",...",
+              "points": 6
+            },
+            {
+              "id": "III.2.g",
+              "name": "Tham gia hoạt động khảo sát thông tin do Đại học thực hiện",
+              "points": 3
+            },
+            {
+              "id": "III.2.h",
+              "name": "Tham gia sự kiện chính trị - xã hội (các Đại hội, Hội nghị, cuộc họp của tổ chức Đảng - Đoàn - Hội từ cấp Chi bộ - Chi đoàn - Chi hội trở lên,... và các chương trình mang tính chính trị - xã hội khác)",
+              "points": 3
+            }
+          ]
+        },
+        {
+          "id": "III.3",
+          "name": "Tham gia công tác cán bộ lớp, Đoàn - Hội",
+          "max": 6,
+          "criteria": [
+            {
+              "id": "III.3.a",
+              "name": "Cán bộ Tổ/ Đội/ CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận",
+              "points": 6,
+              "exclusiveGroup": "can-bo-lop"
+            },
+            {
+              "id": "III.3.b",
+              "name": "Cán bộ Tổ/ Đội/ CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận",
+              "points": 4,
+              "exclusiveGroup": "can-bo-lop"
+            },
+            {
+              "id": "III.3.c",
+              "name": "Cán bộ Tổ/ Đội/ CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành nhiệm vụ được tập thể công nhận",
+              "points": 2,
+              "exclusiveGroup": "can-bo-lop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IV",
+      "name": "Điểm ý thức công dân trong quan hệ cộng đồng",
+      "max": 20,
+      "groups": [
+        {
+          "id": "IV.1",
+          "name": "Các hoạt động liên quan đến trách nhiệm công dân",
+          "max": 16,
+          "criteria": [
+            {
+              "id": "IV.1.a",
+              "name": "Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú",
+              "points": 8
+            },
+            {
+              "id": "IV.1.b",
+              "name": "Tham gia tuyên truyền chủ trương của Đảng, chính sách pháp luật của Nhà nước, quy định của nơi cư trú, quy định và quy chế của nhà trường được địa phương, Nhà trường công nhận",
+              "points": 4
+            },
+            {
+              "id": "IV.1.c",
+              "name": "Khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Đại học",
+              "points": 4
+            },
+            {
+              "id": "IV.1.d",
+              "name": "Tham gia giữ gìn an ninh - trật tự, bảo vệ vệ sinh cảnh quan - môi trường, nếp sống văn minh nơi công cộng, quảng bá hình ảnh đẹp của Nhà trường được địa phương, Nhà trường công nhận",
+              "points": 4
+            }
+          ]
+        },
+        {
+          "id": "IV.2",
+          "name": "Có các thành tích trong học tập và rèn luyện",
+          "max": 4,
+          "criteria": [
+            {
+              "id": "IV.2.a",
+              "name": "Được giấy khen, bằng khen của tổ chức Đoàn, Hội, Nhà trường hoặc chính quyền địa phương",
+              "points": 4
+            },
+            {
+              "id": "IV.2.b",
+              "name": "Đạt loại Khá trở lên khi tham gia học \"Lớp bồi dưỡng nhận thức về Đảng\"",
+              "points": 4
+            },
+            {
+              "id": "IV.2.c",
+              "name": "Đối tượng Đảng được kết nạp Đảng hoặc Đảng viên dự bị được chuyển Đảng chính thức",
+              "points": 4
+            },
+            {
+              "id": "IV.2.d",
+              "name": "Đạt danh hiệu Sinh viên năm tốt từ cấp Trường trở lên",
+              "points": 4
+            },
+            {
+              "id": "IV.2.e",
+              "name": "Nhận bằng khen, huy chương tương đương cấp Bộ trở lên",
+              "points": 4
+            },
+            {
+              "id": "IV.2.f",
+              "name": "Đạt giải trong các cuộc thi chính thức cấp Trường, cấp Thành phố, cấp Quốc gia, Quốc tế",
+              "points": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P",
+      "name": "Điểm trừ nếu vi phạm các quy định",
+      "max": -50,
+      "groups": [
+        {
+          "id": "P.1",
+          "name": "Vi phạm trong học tập",
+          "max": -30,
+          "criteria": [
+            {
+              "id": "P.1.a",
+              "name": "Vi phạm quy chế thi từ cảnh cáo trở lên",
+              "points": -10
+            },
+            {
+              "id": "P.1.b",
+              "name": "Bị kỷ luật khi thi hộ",
+              "points": -20
+            }
+          ]
+        },
+        {
+          "id": "P.2",
+          "name": "Vi phạm trong rèn luyện",
+          "max": -20,
+          "criteria": [
+            {
+              "id": "P.2.a",
+              "name": "Vi phạm quy tắc ứng xử văn hoá",
+              "points": -10
+            },
+            {
+              "id": "P.2.b",
+              "name": "Vi phạm các Quy định của Nhà trường, các Quy định của Pháp luật bị lập biên bản, bị ra quyết định xử lý",
+              "points": -20
+            }
+          ]
+        },
+        {
+          "id": "P.3",
+          "name": "Vi phạm pháp luật",
+          "max": -50,
+          "criteria": [
+            {
+              "id": "P.3.a",
+              "name": "Vi phạm pháp luật thuộc nhóm tội danh hình sự",
+              "points": -50
+            }
+          ]
+        }
+      ],
+      "kind": "penalty"
+    }
+  ]
+}

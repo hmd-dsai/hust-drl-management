@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "userdata.schema.json",
+  "title": "DRL User Data",
+  "description": "Dữ liệu cá nhân của một sinh viên trong một học kỳ: danh sách hoạt động và tiêu chí đã chọn. Đây là nơi DUY NHẤT người dùng nhập liệu; mọi thứ khác (điểm, màu, tổng) đều được tính ra.",
+  "type": "object",
+  "required": ["schemaVersion", "semester", "rubric", "activities"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "semester": { "type": "string", "pattern": "^\\d{4}\\.[1-3]$" },
+    "rubric": {
+      "description": "id của rubric dùng để tính điểm: rubric có id lớn nhất mà ≤ semester (ví dụ semester 2025.2 → rubric 2025.1).",
+      "type": "string"
+    },
+    "excludedCriteria": {
+      "description": "Các tiêu chí người dùng biết chắc không đạt được (màu đỏ trong Checklist), ví dụ không có TOEIC. Bộ tối ưu sẽ bỏ qua chúng.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" },
+      "default": []
+    },
+    "activities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/activity" }
+    }
+  },
+  "$defs": {
+    "activity": {
+      "type": "object",
+      "required": ["id", "name", "status", "eligible", "chosen"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "status": {
+          "description": "planned = định tham gia (vàng); joined = đã tham gia, chưa xác nhận (xanh dương); confirmed = hệ thống đã xác nhận (xanh lá); rejected = chắc chắn không được (đỏ).",
+          "enum": ["planned", "joined", "confirmed", "rejected"]
+        },
+        "eligible": {
+          "description": "Các tiêu chí mà hoạt động này có thể được dùng để tính điểm.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "chosen": {
+          "description": "Tiêu chí được chọn để tính điểm (phải nằm trong eligible), hoặc null nếu chưa chọn.",
+          "type": ["string", "null"]
+        },
+        "pinned": {
+          "description": "true = bộ tối ưu không được đổi chosen của hoạt động này. Hoạt động confirmed luôn được coi như pinned.",
+          "type": "boolean",
+          "default": false
+        },
+        "date": { "type": "string", "format": "date" },
+        "link": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

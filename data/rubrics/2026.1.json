@@ -1,0 +1,425 @@
+{
+  "$schema": "../../schema/rubric.schema.json",
+  "schemaVersion": 1,
+  "id": "2026.1",
+  "name": "Tiêu chí đánh giá điểm rèn luyện HUST (áp dụng từ 2026.1)",
+  "totalMax": 100,
+  "categories": [
+    {
+      "id": "I",
+      "name": "Chấp hành pháp luật và nội quy, quy chế của nhà trường",
+      "max": 25,
+      "groups": [
+        {
+          "id": "I.1",
+          "name": "Chấp hành các quy định của pháp luật đối với công dân",
+          "max": 15,
+          "criteria": [
+            {
+              "id": "I.1.a",
+              "name": "Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú",
+              "points": 6
+            },
+            {
+              "id": "I.1.b",
+              "name": "Tham gia Sinh hoạt công dân do nhà trường tổ chức",
+              "points": 6
+            },
+            {
+              "id": "I.1.c",
+              "name": "Khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Đại học",
+              "points": 4
+            }
+          ]
+        },
+        {
+          "id": "I.2",
+          "name": "Chấp hành nội quy, quy chế và các quy định của nhà trường",
+          "max": 15,
+          "criteria": [
+            {
+              "id": "I.2.a",
+              "name": "Tham gia Họp lớp thường kỳ do Trường/ Khoa tổ chức",
+              "points": 6
+            },
+            {
+              "id": "I.2.b",
+              "name": "Nắm vững quy định và quy chế của nhà trường",
+              "points": 6
+            },
+            {
+              "id": "I.2.c",
+              "name": "Hoàn thành mục tiêu cam kết học tập và rèn luyện (Kết quả GPA và điểm rèn luyện cuối kỳ đạt từ mức đăng ký đầu kỳ trở lên)",
+              "points": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "name": "Trách nhiệm, tinh thần và thái độ trong học tập",
+      "max": 20,
+      "groups": [
+        {
+          "id": "II.1",
+          "name": "Trách nhiệm và thái độ tham gia các hoạt động học tập",
+          "max": 15,
+          "criteria": [
+            {
+              "id": "II.1.a",
+              "name": "Có kế hoạch học tập và rèn luyện phù hợp được thầy cô ghi nhận",
+              "points": 3
+            },
+            {
+              "id": "II.1.b",
+              "name": "Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn",
+              "points": 3
+            },
+            {
+              "id": "II.1.c",
+              "name": "Tham gia các buổi tư vấn xây dựng kế hoạch, động lực học tập phù hợp",
+              "points": 3
+            },
+            {
+              "id": "II.1.d",
+              "name": "Tham gia hoạt động hướng nghiệp, tìm kiếm thông tin việc làm",
+              "points": 3
+            },
+            {
+              "id": "II.1.e",
+              "name": "Tham gia khoá đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn",
+              "points": 6
+            },
+            {
+              "id": "II.1.f",
+              "name": "Chủ động xây dựng, hoàn thiện và cập nhật Portfolio cá nhân theo từng học kỳ",
+              "points": 3
+            }
+          ]
+        },
+        {
+          "id": "II.2",
+          "name": "Trách nhiệm và tinh thần tham gia các kỳ thi, cuộc thi",
+          "max": 12,
+          "criteria": [
+            {
+              "id": "II.2.a",
+              "name": "Tham gia công bố khoa học tại hội nghị hoặc tạp chí khoa học chuyên ngành",
+              "points": 6
+            },
+            {
+              "id": "II.2.b",
+              "name": "Tham gia các cuộc thi Olympic cấp đại học, cấp quốc gia, quốc tế",
+              "points": 6
+            },
+            {
+              "id": "II.2.c",
+              "name": "Thành viên CLB học thuật, Lab nghiên cứu, nhóm nghiên cứu, nhóm khởi nghiệp",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "II.3",
+          "name": "Tinh thần vượt khó, phấn đấu vươn lên trong học tập",
+          "max": 8,
+          "criteria": [
+            {
+              "id": "II.3.a",
+              "name": "Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh báo học tập, hoặc duy trì điểm GPA trên 3.2)",
+              "points": 6
+            },
+            {
+              "id": "II.3.b",
+              "name": "Tham gia các hoạt động tăng cường kỹ năng sử dụng ngoại ngữ được nhà trường ghi nhận",
+              "points": 6
+            },
+            {
+              "id": "II.3.c",
+              "name": "Có chứng chỉ ngoại ngữ quốc tế hoặc tương đương đạt mức TOIEC 600 điểm trở lên (còn hạn)",
+              "points": 6
+            },
+            {
+              "id": "II.3.d",
+              "name": "Được doanh nghiệp tuyển dụng là thực tập sinh và có thời gian thực tập hơn 30 ngày",
+              "points": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "III",
+      "name": "Trách nhiệm tham gia hoạt động chính trị - xã hội, văn hóa, văn nghệ, thể thao, phòng chống tội phạm, tệ nạn xã hội",
+      "max": 20,
+      "groups": [
+        {
+          "id": "III.1",
+          "name": "Trách nhiệm và hiệu quả tham gia các hoạt động rèn luyện về chính trị, xã hội, văn hóa, văn nghệ, thể thao",
+          "max": 15,
+          "criteria": [
+            {
+              "id": "III.1.a",
+              "name": "Tham gia sự kiện chính trị - xã hội (các Đại hội, Hội nghị, cuộc họp của tổ chức Đảng, Đoàn - Hội từ cấp Chi bộ, Chi đoàn, Chi hội trở lên... và các chương trình mang tính chính trị - xã hội khác)",
+              "points": 3
+            },
+            {
+              "id": "III.1.b",
+              "name": "Tham gia cổ vũ các hoạt động phong trào văn hoá, thể thao",
+              "points": 3
+            },
+            {
+              "id": "III.1.c",
+              "name": "Tham gia các hoạt động thể dục nâng cao sức khoẻ được tổ chức bởi các đơn vị hợp pháp",
+              "points": 4
+            },
+            {
+              "id": "III.1.d",
+              "name": "Tham gia các cuộc thi văn hoá, văn nghệ do các tổ chức, đơn vị hợp pháp tổ chức (hát, múa, nhảy, nhạc cụ, hội họa...)",
+              "points": 6
+            },
+            {
+              "id": "III.1.e",
+              "name": "Tham gia các giải thể thao do các tổ chức, đơn vị hợp pháp tổ chức (các môn thể thao chính thức như: chạy, bóng đá, cờ vua, bóng chuyền,...)",
+              "points": 6
+            },
+            {
+              "id": "III.1.f",
+              "name": "Tham gia các khoá đào tạo kỹ năng mềm do các đơn vị được Nhà trường công nhận tổ chức",
+              "points": 6
+            },
+            {
+              "id": "III.1.g",
+              "name": "Thành viên CLB/Tổ/Đội/Nhóm SV hợp pháp, hoạt động về văn nghệ, thể thao, tình nguyện, sở thích",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "III.2",
+          "name": "Tham gia các hoạt động công ích, tình nguyện, công tác xã hội",
+          "max": 12,
+          "criteria": [
+            {
+              "id": "III.2.a",
+              "name": "Tham gia hoạt động khảo sát thông tin do Đại học thực hiện",
+              "points": 3
+            },
+            {
+              "id": "III.2.b",
+              "name": "Tham gia các hoạt động tình nguyện (hỗ trợ địa phương, bảo đảm an toàn giao thông khu vực cổng trường, hỗ trợ tổ chức các chương trình và sự kiện của Đại học/ Trường/ Khoa)",
+              "points": 3
+            },
+            {
+              "id": "III.2.c",
+              "name": "Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tuổi trẻ Bách khoa Nhân ái\"",
+              "points": 3
+            },
+            {
+              "id": "III.2.d",
+              "name": "Tham gia hiến máu nhân đạo do Đại học và các tổ chức hợp pháp phát động, tổ chức",
+              "points": 6
+            },
+            {
+              "id": "III.2.e",
+              "name": "Tham gia các hoạt động phổ biến, tìm hiểu bản sắc văn hoá dân tộc, văn hoá địa phương, văn hoá trường học,...",
+              "points": 3
+            },
+            {
+              "id": "III.2.f",
+              "name": "Tham gia các đội hình hoặc chiến dịch tình nguyện trong và ngoài Nhà trường (Mùa hè xanh, Tình nguyện mùa đông, Tiếp sức mùa thi, Tư vấn viên đồng đẳng...)",
+              "points": 6
+            }
+          ]
+        },
+        {
+          "id": "III.3",
+          "name": "Tham gia tuyên truyền, phòng chống tệ nạn xã hội",
+          "max": 6,
+          "criteria": [
+            {
+              "id": "III.3.a",
+              "name": "Tham gia bảo vệ cảnh quan, môi trường, nếp sống văn minh nơi công cộng",
+              "points": 4
+            },
+            {
+              "id": "III.3.b",
+              "name": "Tham gia các hoạt động đảm bảo an ninh, trật tự và an toàn trường học",
+              "points": 4
+            },
+            {
+              "id": "III.3.c",
+              "name": "Tham gia các diễn đàn sinh viên, các buổi tọa đàm xây dựng quy định, quy chế và pháp luật",
+              "points": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IV",
+      "name": "Điểm ý thức công dân trong quan hệ cộng đồng",
+      "max": 15,
+      "groups": [
+        {
+          "id": "IV.1",
+          "name": "Tham gia tuyên truyền các chủ trương của Đảng, chính sách, pháp luật của Nhà nước trong cộng đồng",
+          "max": 12,
+          "criteria": [
+            {
+              "id": "IV.1.a",
+              "name": "Có hành động tích cực trên không gian mạng, phù hợp với chủ trương của Nhà trường và đường lối, chính sách của Nhà nước",
+              "points": 3
+            },
+            {
+              "id": "IV.1.b",
+              "name": "Tham gia tuyên truyền đường lối của Đảng, pháp luật của Nhà nước, quy định của nơi cư trú hoặc quy chế của Nhà trường được các tổ chức có thẩm quyền xác nhận",
+              "points": 3
+            },
+            {
+              "id": "IV.1.c",
+              "name": "Tham gia các hoạt động phổ biến chủ trương của Đảng, chính sách, pháp luật của Nhà nước",
+              "points": 4
+            },
+            {
+              "id": "IV.1.d",
+              "name": "Tham gia các cuộc thi tìm hiểu lịch sử, văn hóa, truyền thống dân tộc",
+              "points": 4
+            },
+            {
+              "id": "IV.1.e",
+              "name": "Góp phần xây dựng tốt hình ảnh sinh viên Bách khoa với các cơ quan, tổ chức hay doanh nghiệp được nhà trường ghi nhận",
+              "points": 4
+            }
+          ]
+        },
+        {
+          "id": "IV.2",
+          "name": "Trách nhiệm tham gia các hoạt động xã hội được ghi nhận, biểu dương khen thưởng",
+          "max": 12,
+          "criteria": [
+            {
+              "id": "IV.2.a",
+              "name": "Được giấy khen, bằng khen của tổ chức Đoàn, Hội, nhà trường hoặc chính quyền địa phương",
+              "points": 6
+            },
+            {
+              "id": "IV.2.b",
+              "name": "Đạt loại Khá trở lên khi tham gia học \"Lớp bồi dưỡng nhận thức về Đảng\"",
+              "points": 6
+            },
+            {
+              "id": "IV.2.c",
+              "name": "Được kết nạp Đảng hoặc được chuyển Đảng chính thức",
+              "points": 6
+            },
+            {
+              "id": "IV.2.d",
+              "name": "Được cơ quan, công ty hoặc tổ chức hợp pháp nơi thực tập đánh giá hoàn thành tốt nhiệm vụ trở lên",
+              "points": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "V",
+      "name": "Trách nhiệm tham gia và kết quả tham gia công tác cán bộ lớp, công tác đoàn thể, các tổ chức khác của nhà trường hoặc có thành tích xuất sắc trong học tập và rèn luyện được cơ quan có thẩm quyền khen thưởng",
+      "max": 20,
+      "groups": [
+        {
+          "id": "V.1",
+          "name": "Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp",
+          "max": 10,
+          "criteria": [
+            {
+              "id": "V.1.a",
+              "name": "Cán bộ Lớp, Chi bộ, Đoàn - Hội, Tổ/Đội/CLB, trướng nhóm SV NCKH hoàn thành xuất sắc nhiệm vụ trong kỳ",
+              "points": 6
+            },
+            {
+              "id": "V.1.b",
+              "name": "Cán bộ Lớp, Chi bộ, Đoàn - Hội, Tổ/Đội/CLB, trướng nhóm SV NCKH hoàn thành tốt nhiệm vụ trong kỳ",
+              "points": 4
+            },
+            {
+              "id": "V.1.c",
+              "name": "Cán bộ Lớp, Chi bộ, Đoàn - Hội, Tổ/Đội/CLB, trướng nhóm SV NCKH hoàn thành nhiệm vụ trong kỳ",
+              "points": 3
+            }
+          ]
+        },
+        {
+          "id": "V.2",
+          "name": "Hỗ trợ và tham gia tích cực vào các hoạt động chung của Đại học/ Trường/ Khoa/ Lớp",
+          "max": 10,
+          "criteria": [
+            {
+              "id": "V.2.a",
+              "name": "Thành viên tích cực thuộc các Tổ/Đội/CLB, nhóm SV NCKH tham gia hỗ trợ triển khai hoạt động của Lớp, Khoa, Trường hoặc Đại học",
+              "points": 6
+            },
+            {
+              "id": "V.2.b",
+              "name": "Tham gia hỗ trợ triển khai hoạt động của Lớp, Khoa, Trường hoặc Đại học và hoàn thành tốt nhiệm vụ được giao",
+              "points": 4
+            },
+            {
+              "id": "V.2.c",
+              "name": "Tham gia hỗ trợ triển khai hoạt động của Lớp, Khoa, Trường hoặc Đại học và hoàn thành nhiệm vụ được giao",
+              "points": 3
+            }
+          ]
+        },
+        {
+          "id": "V.3",
+          "name": "Có các thành tích trong NCKH, cuộc thi KHKT, khởi nghiệp và các hoạt động khác dành cho sinh viên được cấp có thẩm quyền khen thưởng",
+          "max": 15,
+          "criteria": [
+            {
+              "id": "V.3.a",
+              "name": "Đạt giải trong các cuộc thi chính thức cấp Quốc gia, Quốc tế",
+              "points": 15
+            },
+            {
+              "id": "V.3.b",
+              "name": "Đạt giải trong các cuộc thi chính thức cấp Thành phố",
+              "points": 12
+            },
+            {
+              "id": "V.3.c",
+              "name": "Đạt giải trong các cuộc thi chính thức cấp Đại học",
+              "points": 10
+            },
+            {
+              "id": "V.3.d",
+              "name": "Được khen thưởng, bằng khen, huy chương tương đương cấp Bộ trở lên",
+              "points": 10
+            },
+            {
+              "id": "V.3.e",
+              "name": "Đạt thành tích trong NCKH sinh viên, cuộc thi khoa học kỹ thuật, sáng kiến cải tiến kỹ thuật khởi nghiệp do đơn vị Đại học/ Trường/ Khoa tổ chức",
+              "points": 8
+            },
+            {
+              "id": "V.3.f",
+              "name": "Đạt danh hiệu \"Sinh viên 5 tốt\" từ cấp Đại học trở lên",
+              "points": 8
+            },
+            {
+              "id": "V.3.g",
+              "name": "Có kết quả học tập và rèn luyện kỳ trước đó đạt mức xuất sắc (GPA ≥ 3.6, RL ≥ 90) trở lên",
+              "points": 6
+            },
+            {
+              "id": "V.3.h",
+              "name": "Có kết quả học tập và rèn luyện kỳ trước đó đạt mức giỏi (GPA ≥ 3.2, RL ≥ 80) trở lên",
+              "points": 4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

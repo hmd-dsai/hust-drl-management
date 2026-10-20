@@ -1,0 +1,159 @@
+{
+  "$schema": "../../schema/userdata.schema.json",
+  "schemaVersion": 1,
+  "semester": "2026.1",
+  "rubric": "2026.1",
+  "excludedCriteria": [
+    "II.2.a",
+    "II.3.c",
+    "II.3.d",
+    "III.1.g"
+  ],
+  "activities": [
+    {
+      "id": "su-dung-ptcc",
+      "name": "Sử dụng PTCC",
+      "status": "confirmed",
+      "eligible": [
+        "III.2.e",
+        "III.3.a",
+        "IV.1.c"
+      ],
+      "chosen": "IV.1.c"
+    },
+    {
+      "id": "tham-gia-ai-thuc-chien-2026",
+      "name": "Tham gia AI Thực chiến 2026",
+      "status": "joined",
+      "eligible": [
+        "II.1.b",
+        "II.2.b",
+        "II.2.c"
+      ],
+      "chosen": "II.2.b"
+    },
+    {
+      "id": "thanh-vien-gdg-hust",
+      "name": "Thành viên GDG-HUST",
+      "status": "joined",
+      "eligible": [
+        "II.2.c"
+      ],
+      "chosen": "II.2.c"
+    },
+    {
+      "id": "khai-bao-tam-tru",
+      "name": "Khai báo tạm trú",
+      "status": "confirmed",
+      "eligible": [
+        "I.1.c"
+      ],
+      "chosen": "I.1.c"
+    },
+    {
+      "id": "ssu-tim-hieu-quy-che",
+      "name": "SSU Tìm hiểu quy chế",
+      "status": "confirmed",
+      "eligible": [
+        "IV.1.a"
+      ],
+      "chosen": "IV.1.a"
+    },
+    {
+      "id": "ke-hoach-hoc-tap",
+      "name": "Kế hoạch học tập",
+      "status": "confirmed",
+      "eligible": [
+        "II.1.a"
+      ],
+      "chosen": "II.1.a"
+    },
+    {
+      "id": "khao-sat-dieu-tra-dlxh",
+      "name": "Khảo sát điều tra DLXH",
+      "status": "confirmed",
+      "eligible": [
+        "III.2.a"
+      ],
+      "chosen": "III.2.a"
+    },
+    {
+      "id": "hust-club-day",
+      "name": "HUST Club Day",
+      "status": "confirmed",
+      "eligible": [
+        "III.1.b",
+        "III.2.e"
+      ],
+      "chosen": "III.2.e"
+    },
+    {
+      "id": "festival-ngay-hoi-xe-dien",
+      "name": "Festival \"Ngày hội xe điện\"",
+      "status": "confirmed",
+      "eligible": [
+        "III.1.b",
+        "III.2.e"
+      ],
+      "chosen": "III.1.b"
+    },
+    {
+      "id": "tot-2025-2",
+      "name": "Tốt 2025.2",
+      "status": "confirmed",
+      "eligible": [
+        "V.3.h"
+      ],
+      "chosen": "V.3.h"
+    },
+    {
+      "id": "xuat-sac-2025-2",
+      "name": "Xuất sắc 2025.2",
+      "status": "confirmed",
+      "eligible": [
+        "V.3.g"
+      ],
+      "chosen": "V.3.g"
+    },
+    {
+      "id": "phap-luat",
+      "name": "Pháp luật",
+      "status": "confirmed",
+      "eligible": [
+        "I.1.a",
+        "IV.1.a",
+        "IV.1.c"
+      ],
+      "chosen": "I.1.a"
+    },
+    {
+      "id": "portfolio",
+      "name": "Portfolio",
+      "status": "confirmed",
+      "eligible": [
+        "II.1.f"
+      ],
+      "chosen": "II.1.f"
+    },
+    {
+      "id": "hop-lop",
+      "name": "Họp lớp",
+      "status": "joined",
+      "eligible": [
+        "I.2.a"
+      ],
+      "chosen": "I.2.a"
+    },
+    {
+      "id": "2-cuoc-thi-nghi-quyet-dang",
+      "name": "2 cuộc thi Nghị quyết Đảng",
+      "status": "planned",
+      "eligible": [
+        "III.1.a",
+        "III.2.e",
+        "IV.1.b"
+      ],
+      "chosen": "III.1.a"
+    }
+  ]
+}
