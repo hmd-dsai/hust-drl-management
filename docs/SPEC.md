@@ -138,7 +138,7 @@ Ba màn hình chính cùng thanh trên cùng.
 ### 7.2 Màn hình "Trạng thái ĐRL" (mặc định)
 Thay thế tab Checklist cũ. Mục tiêu: nhìn là biết ngay đang ở đâu và cần tập trung vào đâu.
 
-- **Thẻ tổng.** Ba con số theo ba kịch bản ở mục 4, mỗi con số kèm xếp loại tương ứng. Ngưỡng xếp loại để trong hằng số cấu hình, mặc định 90/80/65/50/35.
+- **Thẻ tổng.** Ba con số theo ba kịch bản ở mục 4, mỗi con số kèm xếp loại tương ứng. Ngưỡng xếp loại để trong hằng số cấu hình (`src/domain/grading.ts`), mặc định so sánh ≥: 90 Xuất sắc, 80 Tốt, 65 Khá, 50 Trung bình, 35 Yếu, dưới 35 Kém. Kèm dòng "còn N điểm nữa lên <mức trên>".
 - **Bảng theo mục lớn.** Mỗi mục lớn một dòng, ba cột theo ba kịch bản, có `max`. Dùng thanh tiến độ xếp chồng: phần xanh lá (hiện tại), nối tiếp phần xanh dương (đã tham gia), rồi phần vàng (kế hoạch), trên nền là `max`.
 - **Cây chi tiết.** Mục lớn → nhóm → tiêu chí.
   - Mỗi nhóm có thanh tiến độ xếp chồng như trên. Nhóm đã chạm trần thì hiện nhãn "Đầy"; nếu có `wasted > 0` thì hiện "phí N điểm".
@@ -201,4 +201,4 @@ Cách lưu giống nhau trên mọi trình duyệt. **File JSON tải xuống l�
 - Sửa rubric trong app.
 
 ## 10. Câu hỏi nghiệp vụ còn mở
-- Ngưỡng xếp loại ĐRL: tên từng mức, và so sánh ≥ hay >.
+- Chưa có.

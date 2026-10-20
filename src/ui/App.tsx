@@ -14,12 +14,16 @@ import {
 import { ImportDialog, type ImportState } from './ImportDialog.tsx'
 import { NewDataDialog } from './NewDataDialog.tsx'
 import { TempActivities } from './TempActivities.tsx'
-import { TopBar } from './TopBar.tsx'
+import { StatusScreen } from './StatusScreen.tsx'
+import { TopBar, type Tab } from './TopBar.tsx'
 import { Welcome } from './Welcome.tsx'
 
 const store = createDraftStore(browserStorage())
 const AUTOSAVE_MS = 500
 const MAX_FILE_BYTES = 5_000_000
+
+const TAB_HASH: Record<Tab, string> = { status: '#/', activities: '#/hoat-dong' }
+const tabFromHash = (): Tab => (window.location.hash === TAB_HASH.activities ? 'activities' : 'status')
 
 function isEditable(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
@@ -36,6 +40,13 @@ export function App() {
   const [saveFailed, setSaveFailed] = useState(false)
   const [dragging, setDragging] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
+
+  const [tab, setTab] = useState<Tab>(tabFromHash)
+  useEffect(() => {
+    const onHash = () => setTab(tabFromHash())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   const dirty = useMemo(() => (doc ? isDirty(doc.data, doc.savedSnapshot) : false), [doc])
 
@@ -185,6 +196,8 @@ export function App() {
           onDownload={download}
           onUpload={() => fileInput.current?.click()}
           onNew={() => setShowNew(true)}
+          tab={tab}
+          onTab={(t) => (window.location.hash = TAB_HASH[t])}
         />
       )}
 
@@ -194,9 +207,23 @@ export function App() {
         </div>
       )}
 
-      {doc ? (
-        <TempActivities data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
+      {!doc ? null : tab === 'status' ? (
+        <StatusScreen
+          data={doc.data}
+          onToggleExcluded={(id) =>
+            dispatch({
+              type: 'edit',
+              recipe: (d) => {
+                const list = d.excludedCriteria ?? []
+                return { ...d, excludedCriteria: list.includes(id) ? list.filter((x) => x !== id) : [...list, id] }
+              },
+            })
+          }
+        />
       ) : (
+        <TempActivities data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
+      )}
+      {!doc && (
         <Welcome onUpload={() => fileInput.current?.click()} onNew={() => setShowNew(true)} />
       )}
 

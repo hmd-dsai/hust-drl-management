@@ -1,6 +1,13 @@
 import type { UserData } from '../domain/types.ts'
 import { btn } from './Dialog.tsx'
 
+export type Tab = 'status' | 'activities'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'status', label: 'Trạng thái ĐRL' },
+  { id: 'activities', label: 'Hoạt động' },
+]
+
 interface Props {
   data: UserData
   rubricId: string
@@ -14,6 +21,8 @@ interface Props {
   onDownload: () => void
   onUpload: () => void
   onNew: () => void
+  tab: Tab
+  onTab: (tab: Tab) => void
 }
 
 /** Thanh trên cùng (SPEC mục 7.1). */
@@ -70,6 +79,23 @@ export function TopBar(p: Props) {
           </button>
         </nav>
       </div>
+      <nav aria-label="Màn hình" className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            aria-current={p.tab === t.id ? 'page' : undefined}
+            onClick={() => p.onTab(t.id)}
+            className={`-mb-px whitespace-nowrap border-b-2 px-3 py-1.5 text-sm font-medium ${
+              p.tab === t.id
+                ? 'border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
     </header>
   )
 }
