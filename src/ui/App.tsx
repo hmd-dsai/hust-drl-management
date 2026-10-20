@@ -11,9 +11,9 @@ import {
   parseUserDataFile,
   serializeUserData,
 } from '../storage.ts'
+import { ActivitiesScreen } from './ActivitiesScreen.tsx'
 import { ImportDialog, type ImportState } from './ImportDialog.tsx'
 import { NewDataDialog } from './NewDataDialog.tsx'
-import { TempActivities } from './TempActivities.tsx'
 import { StatusScreen } from './StatusScreen.tsx'
 import { TopBar, type Tab } from './TopBar.tsx'
 import { Welcome } from './Welcome.tsx'
@@ -221,7 +221,7 @@ export function App() {
           }
         />
       ) : (
-        <TempActivities data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
+        <ActivitiesScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
       )}
       {!doc && (
         <Welcome onUpload={() => fileInput.current?.click()} onNew={() => setShowNew(true)} />
