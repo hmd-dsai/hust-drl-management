@@ -15,6 +15,7 @@ import { ActivitiesScreen } from './ActivitiesScreen.tsx'
 import { ImportDialog, type ImportState } from './ImportDialog.tsx'
 import { NewDataDialog } from './NewDataDialog.tsx'
 import { StatusScreen } from './StatusScreen.tsx'
+import { SuggestScreen } from './SuggestScreen.tsx'
 import { TopBar, type Tab } from './TopBar.tsx'
 import { Welcome } from './Welcome.tsx'
 
@@ -22,8 +23,9 @@ const store = createDraftStore(browserStorage())
 const AUTOSAVE_MS = 500
 const MAX_FILE_BYTES = 5_000_000
 
-const TAB_HASH: Record<Tab, string> = { status: '#/', activities: '#/hoat-dong' }
-const tabFromHash = (): Tab => (window.location.hash === TAB_HASH.activities ? 'activities' : 'status')
+const TAB_HASH: Record<Tab, string> = { status: '#/', activities: '#/hoat-dong', suggest: '#/goi-y' }
+const tabFromHash = (): Tab =>
+  (Object.keys(TAB_HASH) as Tab[]).find((t) => TAB_HASH[t] === window.location.hash) ?? 'status'
 
 function isEditable(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
@@ -220,8 +222,10 @@ export function App() {
             })
           }
         />
-      ) : (
+      ) : tab === 'activities' ? (
         <ActivitiesScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
+      ) : (
+        <SuggestScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
       )}
       {!doc && (
         <Welcome onUpload={() => fileInput.current?.click()} onNew={() => setShowNew(true)} />

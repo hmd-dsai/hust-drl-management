@@ -1,11 +1,12 @@
 import type { UserData } from '../domain/types.ts'
 import { btn } from './Dialog.tsx'
 
-export type Tab = 'status' | 'activities'
+export type Tab = 'status' | 'activities' | 'suggest'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'status', label: 'Trạng thái ĐRL' },
   { id: 'activities', label: 'Hoạt động' },
+  { id: 'suggest', label: 'Gợi ý' },
 ]
 
 interface Props {

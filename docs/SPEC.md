@@ -113,13 +113,15 @@ Trả về danh sách thông báo có mức `warning` hoặc `info`. Không ch�
 Mục tiêu: tìm cách gán `chosen` cho điểm cao nhất.
 
 - **Cố định**, không được đổi: hoạt động `confirmed`, hoạt động `pinned`, hoạt động penalty, hoạt động `rejected` (bỏ qua).
-- **Tự do**: các hoạt động còn lại. Lựa chọn của mỗi hoạt động là `eligible − excludedCriteria`, hoặc `null`.
+- **Tự do**: các hoạt động còn lại. Lựa chọn của mỗi hoạt động là `eligible − excludedCriteria` (loại trừ hiệu lực, mục 5), hoặc `null`, và luôn gồm cả `chosen` hiện tại nếu đó là tiêu chí có trong rubric. Nhờ vậy cách gán hiện tại luôn nằm trong không gian tìm kiếm, nên kết quả không bao giờ tệ hơn hiện tại.
 - Hàm mục tiêu, so sánh theo thứ tự ưu tiên:
   1. tối đa điểm "Nếu làm hết kế hoạch";
   2. tối đa điểm "Nếu đã tham gia được tính";
   3. ít thay đổi nhất so với cách gán hiện tại.
 - Thuật toán: DFS / branch-and-bound. Thường chỉ có ≤ 20 hoạt động tự do, mỗi hoạt động ≤ 5 lựa chọn. Đặt giới hạn số node, quá giới hạn thì dùng greedy và báo cho người dùng.
-- Kết quả trả về: cách gán mới, điểm trước/sau, và danh sách thay đổi `{activityId, from, to, gain}`.
+  - Giới hạn mặc định 200 000 node (khoảng 0,2–0,3 s). Lời giải ban đầu lấy từ leo đồi; cắt nhánh bằng chặn trên (bật mọi lựa chọn còn lại), bằng ghi nhớ trạng thái (tập tiêu chí đang bật) và bằng luật trội.
+  - Quá giới hạn thì trả về lời giải tốt nhất đã tìm được, với `method: 'greedy'`.
+- Kết quả trả về: cách gán mới, điểm trước/sau, và danh sách thay đổi `{activityId, from, to, gain}`. `gain` là điểm "Nếu làm hết kế hoạch" tăng thêm nếu **chỉ áp dụng riêng dòng đó** lên dữ liệu hiện tại (marginalGain). Vì các dòng có thể phụ thuộc nhau, tổng các `gain` có thể khác mức tăng khi áp dụng tất cả.
 - Hàm phụ `marginalGain(rubric, user, activity, criterionId)`: điểm "Nếu làm hết kế hoạch" tăng bao nhiêu nếu gán hoạt động đó vào tiêu chí đó. Form nhập hoạt động dùng hàm này để hiện gợi ý nhỏ, còn tối ưu toàn cục chỉ chạy ở màn hình Gợi ý.
   - Nhận object hoạt động (có thể là bản nháp chưa có trong `user`), không nhận id.
   - Gain = điểm khi gán `criterionId` − điểm khi hoạt động giữ `chosen` hiện tại (null nếu là hoạt động mới). Cả hai lần tính đều thay hoạt động đó vào `user`, các hoạt động khác giữ nguyên.
