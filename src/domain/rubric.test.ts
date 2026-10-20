@@ -7,6 +7,7 @@ import {
   getRubric,
   loadRubrics,
   parseRubric,
+  resolveRubric,
   rubricForSemester,
   rubricIndex,
   rubrics,
@@ -48,6 +49,17 @@ describe('rubricForSemester', () => {
     ['không hợp lệ', '2026.1'],
   ])('%s → %s', (semester, expected) => {
     expect(rubricForSemester(semester).id).toBe(expected)
+  })
+})
+
+describe('resolveRubric', () => {
+  it('dùng trường rubric nếu id tồn tại', () => {
+    expect(resolveRubric({ rubric: '2025.1', semester: '2026.1' }).id).toBe('2025.1')
+  })
+
+  it('id không tồn tại thì chọn theo học kỳ', () => {
+    expect(resolveRubric({ rubric: '2024.1', semester: '2025.2' }).id).toBe('2025.1')
+    expect(resolveRubric({ rubric: '', semester: '2026.2' }).id).toBe('2026.1')
   })
 })
 

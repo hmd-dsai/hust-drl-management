@@ -1,7 +1,7 @@
 // Nạp rubric từ data/rubrics/, validate, chọn rubric theo học kỳ, và index id → node.
 
 import { validateRubricJson, type ParseResult } from './schema.ts'
-import type { Category, Criterion, Group, Rubric, Semester } from './types.ts'
+import type { Category, Criterion, Group, Rubric, Semester, UserData } from './types.ts'
 
 export type RubricNode =
   | { kind: 'category'; node: Category; parentId: null }
@@ -128,4 +128,9 @@ export function rubricForSemester(semester: Semester, list: readonly Rubric[] = 
   let found = oldest
   for (const r of list) if (compareSemester(r.id, semester) <= 0) found = r
   return found
+}
+
+/** Rubric để tính điểm cho UserData: trường `rubric` nếu id tồn tại, không thì theo học kỳ (SPEC mục 3). */
+export function resolveRubric(user: Pick<UserData, 'rubric' | 'semester'>, list: readonly Rubric[] = rubrics): Rubric {
+  return list.find((r) => r.id === user.rubric) ?? rubricForSemester(user.semester, list)
 }
