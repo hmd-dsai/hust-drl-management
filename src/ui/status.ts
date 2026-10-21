@@ -28,23 +28,38 @@ const PLANNED_STRIPES =
  * Màu theo kịch bản cho thanh tiến độ xếp chồng: xanh lá (hiện tại) → xanh dương (đã tham gia) → vàng (kế hoạch).
  * Icon trùng với icon trạng thái tương ứng; phần kế hoạch có sọc để phân biệt cả khi không nhìn rõ màu.
  */
-export const SCENARIO_META: Record<ScenarioKey, { short: string; icon: string; tone: Status; bar: string; text: string }> = {
+export const SCENARIO_META: Record<
+  ScenarioKey,
+  {
+    /** Tên kịch bản theo thuật ngữ thống nhất (docs/DESIGN.md mục 2.1). */
+    long: string
+    /** Phần cộng thêm so với kịch bản trước, ví dụ "+6 chờ xác nhận". */
+    delta: string
+    icon: string
+    tone: Status
+    bar: string
+    text: string
+  }
+> = {
   confirmed: {
-    short: 'Hiện tại',
+    long: 'Điểm hiện tại',
+    delta: 'đã xác nhận',
     icon: STATUS_META.confirmed.icon,
     tone: 'confirmed',
     bar: TONE.confirmed.bar,
     text: TONE.confirmed.fg,
   },
   done: {
-    short: 'Đã tham gia',
+    long: 'Nếu được xác nhận hết',
+    delta: 'chờ xác nhận',
     icon: STATUS_META.joined.icon,
     tone: 'joined',
     bar: TONE.joined.bar,
     text: TONE.joined.fg,
   },
   projected: {
-    short: 'Kế hoạch',
+    long: 'Nếu làm hết dự định',
+    delta: 'dự định',
     icon: STATUS_META.planned.icon,
     tone: 'planned',
     bar: PLANNED_STRIPES,

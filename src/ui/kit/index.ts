@@ -1,5 +1,6 @@
-export { Badge, StatusBadge } from './Badge.tsx'
+export { Badge, StatusBadge, StatusIcon } from './Badge.tsx'
 export { Button, IconButton } from './Button.tsx'
 export { Card } from './Card.tsx'
 export { ProgressBar } from './ProgressBar.tsx'
+export { Segmented } from './Segmented.tsx'
 export { fieldClass, Select } from './Select.tsx'

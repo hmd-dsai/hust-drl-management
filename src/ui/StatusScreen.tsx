@@ -1,13 +1,13 @@
-// Màn hình "Trạng thái ĐRL" (SPEC mục 7.2). Chỉ đọc, ngoại trừ bật/tắt loại trừ tiêu chí.
+// Màn hình "Trạng thái ĐRL" (SPEC mục 7.2, docs/DESIGN.md mục 4.1). Chỉ đọc, ngoại trừ bật/tắt loại trừ tiêu chí.
 
 import { useMemo, useState } from 'react'
-import { gradeOf, nextGrade } from '../domain/grading.ts'
+import { GRADES, gradeOf, nextGrade } from '../domain/grading.ts'
 import { criterionInfo, fullAt, scoreNodes, type CriterionInfo } from '../domain/overview.ts'
 import { resolveRubric } from '../domain/rubric.ts'
-import { computeScenarios, SCENARIO_KEYS, SCENARIOS, type ScenarioKey } from '../domain/scoring.ts'
+import { computeScenarios, type ScenarioKey, type ScenarioScores } from '../domain/scoring.ts'
 import type { Category, Criterion, Group, UserData } from '../domain/types.ts'
-import { Badge, Button, Card, ProgressBar, StatusBadge } from './kit/index.ts'
-import { SCENARIO_META } from './status.ts'
+import { Badge, Button, ProgressBar, Segmented, StatusIcon } from './kit/index.ts'
+import { SCENARIO_META, STATUS_META } from './status.ts'
 
 interface Props {
   data: UserData
@@ -16,20 +16,40 @@ interface Props {
 }
 
 type Values = Record<ScenarioKey, number>
+type Filter = 'all' | 'open'
+
+const FILTERS = [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'open', label: 'Còn trống' },
+] as const
 
 const FULL_TITLE: Record<ScenarioKey, string> = {
-  confirmed: 'Đã đầy với các hoạt động đã được xác nhận',
+  confirmed: 'Đã đầy với các hoạt động đã xác nhận',
   done: 'Sẽ đầy khi các hoạt động đã tham gia được xác nhận',
-  projected: 'Sẽ đầy nếu làm hết kế hoạch',
+  projected: 'Sẽ đầy nếu làm hết dự định',
 }
+
+/**
+ * Cột của dòng mục/nhóm: chevron · tên · thanh · số, để mắt dò được theo cột.
+ * Trên điện thoại tên chiếm cả dòng, thanh và số xuống dòng dưới.
+ */
+const ROW_GRID =
+  'grid w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-2 sm:grid-cols-[1rem_minmax(0,1fr)_10rem_auto] sm:items-start'
+const NAME_CELL = 'col-[2/4] row-start-1 self-start sm:col-[2/3]'
+const BAR_CELL = 'col-[2/3] row-start-2 sm:col-[3/4] sm:row-start-1'
+const NUM_CELL = 'col-[3/4] row-start-2 sm:col-[4/5] sm:row-start-1'
+
+/** Số có dấu trừ thật (−) cho mục trừ điểm. */
+const fmt = (n: number) => (n < 0 ? `−${-n}` : `${n}`)
 
 export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
   const rubric = resolveRubric(data)
   const scores = useMemo(() => computeScenarios(rubric, data), [rubric, data])
   const nodes = useMemo(() => scoreNodes(scores), [scores])
   const info = useMemo(() => criterionInfo(rubric, data), [rubric, data])
-  const [hideFull, setHideFull] = useState(false)
-  const [onlyOpen, setOnlyOpen] = useState(false)
+  const [filter, setFilter] = useState<Filter>('all')
+  /** Mục người dùng đã tự mở/đóng; mục còn lại theo mặc định (mở nếu còn trống điểm). */
+  const [toggled, setToggled] = useState<Map<string, boolean>>(new Map())
   const [openId, setOpenId] = useState<string | null>(null)
 
   const values = (id: string): Values => ({
@@ -38,21 +58,28 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
     projected: nodes.projected.get(id)?.capped ?? 0,
   })
   const wasted = (id: string) => nodes.projected.get(id)?.wasted ?? 0
-  const isOpen = (c: Criterion) => {
+  const hasRoom = (cat: Category) => {
+    const v = values(cat.id).projected
+    return cat.kind === 'penalty' ? v !== 0 : v < cat.max
+  }
+  const isOpen = (cat: Category) => toggled.get(cat.id) ?? hasRoom(cat)
+  const toggle = (cat: Category) => setToggled(new Map(toggled).set(cat.id, !isOpen(cat)))
+
+  const isEmpty = (c: Criterion) => {
     const i = info.get(c.id)!
     return i.best === null && !i.excluded
   }
-  const visibleCriteria = (g: Group) => (onlyOpen ? g.criteria.filter(isOpen) : g.criteria)
+  const visibleCriteria = (g: Group) => (filter === 'open' ? g.criteria.filter(isEmpty) : g.criteria)
   const visibleGroups = (cat: Category) =>
-    cat.groups.filter((g) => !(hideFull && fullAt(nodes, g.id) !== null) && visibleCriteria(g).length > 0)
+    cat.groups.filter((g) => !(filter === 'open' && fullAt(nodes, g.id) !== null) && visibleCriteria(g).length > 0)
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-6">
+    <main className="mx-auto max-w-[960px] space-y-12 px-4 py-8 sm:px-8">
       {data.activities.length === 0 && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-surface p-4 text-sm text-fg-muted">
-          <span>
+        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-surface p-4 text-small text-fg-muted">
+          <span className="min-w-0 flex-1">
             Chưa có hoạt động nào. Thêm hoạt động đã làm hoặc định làm để xem điểm. Tiêu chí nào biết chắc không đạt
-            được thì bấm vào nó ở cây chi tiết bên dưới để đánh dấu loại trừ.
+            được thì bấm vào nó ở danh sách bên dưới để đánh dấu.
           </span>
           <Button variant="primary" onClick={onAddActivity}>
             Thêm hoạt động
@@ -60,234 +87,255 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
         </div>
       )}
 
-      {/* ---- Thẻ tổng ---- */}
-      <section aria-labelledby="tong-diem">
-        <h2 id="tong-diem" className="sr-only">
-          Tổng điểm
-        </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {SCENARIO_KEYS.map((k) => {
-            const score = scores[k].capped
-            const next = nextGrade(score)
-            return (
-              <Card key={k} data-scenario={k}>
-                <div className={`text-sm font-medium ${SCENARIO_META[k].text}`}>
-                  <span aria-hidden>{SCENARIO_META[k].icon}</span> {SCENARIOS[k].label}
-                </div>
-                <div className="mt-1 flex items-baseline gap-2">
-                  <span data-testid="total" className="text-4xl font-semibold tabular-nums">
-                    {score}
-                  </span>
-                  <span className="text-fg-subtle">/ {rubric.totalMax}</span>
-                  <Badge className="ml-auto">{gradeOf(score).label}</Badge>
-                </div>
-                <div className="mt-1 text-sm text-fg-subtle">
-                  {next ? `Còn ${next.gap} điểm nữa lên ${next.grade.label}` : 'Đã đạt mức cao nhất'}
-                </div>
-              </Card>
-            )
-          })}
-        </div>
-        <ProgressBar values={values('total')} max={rubric.totalMax} size="md" className="mt-3" />
-        <Legend />
-      </section>
+      <Summary scores={scores} totalMax={rubric.totalMax} values={values('total')} />
 
-      {/* ---- Bảng theo mục lớn ---- */}
       <section aria-labelledby="theo-muc">
-        <h2 id="theo-muc" className="mb-2 text-heading">
-          Theo mục
-        </h2>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border-strong text-left text-fg-subtle">
-              <th className="py-1.5 font-normal">Mục</th>
-              {SCENARIO_KEYS.map((k) => (
-                <th key={k} className={`w-10 whitespace-nowrap py-1.5 pl-2 text-right font-normal sm:w-32 ${SCENARIO_META[k].text}`} title={SCENARIOS[k].label}>
-                  <span aria-hidden>{SCENARIO_META[k].icon}</span>
-                  <span className="sr-only sm:not-sr-only"> {SCENARIO_META[k].short}</span>
-                </th>
-              ))}
-              <th className="w-10 py-1.5 text-right font-normal sm:w-14">Max</th>
-              <th className="hidden w-20 py-1.5 text-right font-normal sm:table-cell">Còn trống</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rubric.categories.map((cat) => {
-              const v = values(cat.id)
-              const penalty = cat.kind === 'penalty'
-              return (
-                <tr key={cat.id} data-node={cat.id} className="border-b border-border align-top">
-                  <td className="py-2 pr-3">
-                    <button
-                      type="button"
-                      className="text-left hover:underline"
-                      onClick={() => {
-                        const el = document.getElementById(`muc-${cat.id}`) as HTMLDetailsElement | null
-                        if (el) {
-                          el.open = true
-                          el.scrollIntoView({ behavior: 'smooth' })
-                        }
-                      }}
-                    >
-                      <span className="font-mono">{cat.id}</span>. {cat.name}
-                    </button>
-                    <ProgressBar values={v} max={cat.max} penalty={penalty} className="mt-1.5" />
-                  </td>
-                  {SCENARIO_KEYS.map((k) => (
-                    <td key={k} data-scenario={k} className="py-2 text-right tabular-nums">
-                      {v[k]}
-                    </td>
-                  ))}
-                  <td className="py-2 text-right tabular-nums text-fg-subtle">{cat.max}</td>
-                  <td className="hidden py-2 text-right tabular-nums sm:table-cell">{penalty ? '—' : cat.max - v.projected}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </section>
-
-      {/* ---- Cây chi tiết ---- */}
-      <section aria-labelledby="chi-tiet">
-        <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2">
-          <h2 id="chi-tiet" className="text-heading">
-            Chi tiết
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="theo-muc" className="text-heading">
+            Theo mục
           </h2>
-          <label className="flex items-center gap-1.5 text-sm">
-            <input type="checkbox" checked={hideFull} onChange={(e) => setHideFull(e.target.checked)} />
-            Ẩn nhóm đã đầy
-          </label>
-          <label className="flex items-center gap-1.5 text-sm">
-            <input type="checkbox" checked={onlyOpen} onChange={(e) => setOnlyOpen(e.target.checked)} />
-            Chỉ hiện tiêu chí còn trống
-          </label>
+          <Segmented aria-label="Hiện tiêu chí" value={filter} options={FILTERS} onChange={setFilter} />
         </div>
 
-        <div className="space-y-6">
+        <ul className="border-t border-border">
           {rubric.categories.map((cat) => {
-            const groups = visibleGroups(cat)
+            const open = isOpen(cat)
             const penalty = cat.kind === 'penalty'
+            const groups = visibleGroups(cat)
             return (
-              <details key={cat.id} id={`muc-${cat.id}`} open className="group/cat scroll-mt-28">
-                <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1 [&::-webkit-details-marker]:hidden">
-                  <span aria-hidden className="inline-block w-3 text-fg-subtle transition-transform group-open/cat:rotate-90">
-                    ▸
-                  </span>
-                  <h3 className="font-semibold">
-                    <span className="font-mono">{cat.id}</span>. {cat.name}
-                  </h3>
-                  <Trio values={values(cat.id)} max={cat.max} />
-                  {!penalty && <Tags at={fullAt(nodes, cat.id)} wasted={wasted(cat.id)} />}
-                </summary>
-                {groups.length === 0 ? (
-                  <p className="mt-2 text-sm text-fg-subtle">Không có nhóm nào khớp bộ lọc.</p>
-                ) : (
-                  <div className="mt-2 space-y-3">
-                    {groups.map((g) => (
-                      <Card key={g.id} data-node={g.id} padding="none" className="overflow-hidden">
-                        <div className="border-b border-border px-3 py-2">
-                          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                            <h4 className="text-sm font-medium">
-                              <span className="font-mono">{g.id}</span> {g.name}
-                            </h4>
-                            <Trio values={values(g.id)} max={g.max} />
-                            {!penalty && <Tags at={fullAt(nodes, g.id)} wasted={wasted(g.id)} />}
+              <li key={cat.id} data-node={cat.id} className="border-b border-border">
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  aria-controls={`muc-${cat.id}`}
+                  onClick={() => toggle(cat)}
+                  className={`${ROW_GRID} rounded-md py-3 text-left hover:bg-surface`}
+                >
+                  <Chevron open={open} />
+                  <NodeName id={cat.id} name={cat.name} level="category" full={penalty ? null : fullAt(nodes, cat.id)} wasted={penalty ? 0 : wasted(cat.id)} />
+                  <ProgressBar values={values(cat.id)} max={cat.max} penalty={penalty} size="md" className={`${BAR_CELL} sm:mt-[7px]`} />
+                  <Numbers values={values(cat.id)} max={cat.max} strong className={NUM_CELL} />
+                </button>
+
+                {open && (
+                  <div id={`muc-${cat.id}`} className="pb-4">
+                    {groups.length === 0 ? (
+                      <p className="py-1 pl-9 text-small text-fg-subtle">
+                        {filter === 'open' ? 'Không còn tiêu chí trống trong mục này.' : 'Mục này chưa có nhóm nào.'}
+                      </p>
+                    ) : (
+                      groups.map((g) => (
+                        <div key={g.id} data-node={g.id} className="mt-3 first:mt-0">
+                          <div className={`${ROW_GRID} py-1.5`}>
+                            <NodeName id={g.id} name={g.name} level="group" full={penalty ? null : fullAt(nodes, g.id)} wasted={penalty ? 0 : wasted(g.id)} />
+                            <ProgressBar values={values(g.id)} max={g.max} penalty={penalty} size="xs" className={`${BAR_CELL} sm:mt-2`} />
+                            <Numbers values={values(g.id)} max={g.max} className={NUM_CELL} />
                           </div>
-                          <ProgressBar values={values(g.id)} max={g.max} penalty={penalty} className="mt-1.5" />
+                          <ul className="sm:ml-7">
+                            {visibleCriteria(g).map((c) => (
+                              <CriterionRow
+                                key={c.id}
+                                criterion={c}
+                                info={info.get(c.id)!}
+                                superseded={(nodes.projected.get(c.id)?.wasted ?? 0) !== 0}
+                                dimEmpty={filter === 'all'}
+                                open={openId === c.id}
+                                onToggleOpen={() => setOpenId(openId === c.id ? null : c.id)}
+                                onToggleExcluded={() => onToggleExcluded(c.id)}
+                              />
+                            ))}
+                          </ul>
                         </div>
-                        <ul className="divide-y divide-border">
-                          {visibleCriteria(g).map((c) => (
-                            <CriterionRow
-                              key={c.id}
-                              criterion={c}
-                              info={info.get(c.id)!}
-                              superseded={(nodes.projected.get(c.id)?.wasted ?? 0) !== 0}
-                              open={openId === c.id}
-                              onToggleOpen={() => setOpenId(openId === c.id ? null : c.id)}
-                              onToggleExcluded={() => onToggleExcluded(c.id)}
-                            />
-                          ))}
-                        </ul>
-                      </Card>
-                    ))}
+                      ))
+                    )}
                   </div>
                 )}
-              </details>
+              </li>
             )
           })}
-        </div>
+        </ul>
       </section>
     </main>
   )
 }
 
-function Legend() {
+// ---------- Tổng điểm ----------
+
+function Swatch({ k }: { k: ScenarioKey }) {
+  return <span aria-hidden className={`inline-block size-2.5 shrink-0 rounded-sm ${SCENARIO_META[k].bar}`} />
+}
+
+/** Một số chính thật to (điểm hiện tại); hai kịch bản còn lại nhỏ bên cạnh, mỗi số chỉ một lần. */
+function Summary({ scores, totalMax, values }: { scores: ScenarioScores; totalMax: number; values: Values }) {
+  const score = scores.confirmed.capped
+  const next = nextGrade(score)
   return (
-    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-muted">
-      {SCENARIO_KEYS.map((k) => (
-        <li key={k} className="flex items-center gap-1.5">
-          <span aria-hidden className={`inline-block h-2 w-5 rounded-sm ${SCENARIO_META[k].bar}`} />
-          {SCENARIO_META[k].icon} {k === 'confirmed' ? 'Đã xác nhận' : k === 'done' ? 'Đã tham gia, chờ xác nhận' : 'Dự định'}
-        </li>
-      ))}
-    </ul>
+    <section aria-labelledby="tong-diem" className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-5">
+        <div data-scenario="confirmed">
+          <h2 id="tong-diem" className="flex items-center gap-2 text-small font-medium text-fg-muted">
+            <Swatch k="confirmed" />
+            {SCENARIO_META.confirmed.long}
+          </h2>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+            <span data-testid="total" className="text-display tabular-nums">
+              {score}
+            </span>
+            <span className="text-title font-normal text-fg-subtle">/ {totalMax}</span>
+            <Badge size="md" className="ml-1 self-center">
+              {gradeOf(score).label}
+            </Badge>
+          </div>
+          <p className="mt-1 text-small text-fg-muted">
+            {next ? `Còn ${next.gap} điểm nữa lên ${next.grade.label}` : 'Đã đạt mức cao nhất'}
+          </p>
+        </div>
+
+        <dl className="grid grid-cols-[auto_auto_auto] items-baseline gap-x-4 gap-y-2">
+          {(['done', 'projected'] as const).map((k) => (
+            <div key={k} data-scenario={k} className="contents">
+              <dt className="flex items-center gap-2 text-small text-fg-muted">
+                <Swatch k={k} />
+                {SCENARIO_META[k].long}
+              </dt>
+              <dd className="text-right text-heading tabular-nums">{scores[k].capped}</dd>
+              <dd className="text-small text-fg-muted">{gradeOf(scores[k].capped).label}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <GradeScale values={values} max={totalMax} />
+    </section>
   )
 }
 
-/** "✓ 10 ◐ 16 ○ 16 / 25" — ba kịch bản kèm icon, không chỉ dựa vào màu. */
-function Trio({ values, max }: { values: Values; max: number }) {
+/** Thanh tổng có vạch ngưỡng xếp loại bên dưới. */
+function GradeScale({ values, max }: { values: Values; max: number }) {
+  const ticks = GRADES.filter((g) => g.min > 0 && g.min < max)
+  const left = (n: number) => ({ left: `${(n / max) * 100}%` })
   return (
-    <span className="flex items-baseline gap-2 text-sm tabular-nums">
-      {SCENARIO_KEYS.map((k) => (
-        <span key={k} data-scenario={k} className={SCENARIO_META[k].text} title={SCENARIOS[k].label}>
-          <span aria-hidden>{SCENARIO_META[k].icon}</span>
-          <span className="sr-only">{SCENARIOS[k].label}:</span> {values[k]}
+    <div>
+      <div className="relative">
+        <ProgressBar values={values} max={max} size="md" />
+        {ticks.map((g) => (
+          <span key={g.label} aria-hidden style={left(g.min)} className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-canvas" />
+        ))}
+      </div>
+      <div aria-hidden className="relative mt-1.5 h-4 text-xs text-fg-subtle">
+        {ticks.map((g) => (
+          <span key={g.label} style={left(g.min)} className="absolute -translate-x-1/2 whitespace-nowrap tabular-nums">
+            {g.min}
+            <span className="hidden sm:inline"> {g.label}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ---------- Dòng mục / nhóm ----------
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 16 16"
+      className={`col-[1/2] row-start-1 mt-[3px] size-4 self-start text-fg-subtle transition-transform ${open ? 'rotate-90' : ''}`}
+    >
+      <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+interface NodeNameProps {
+  id: string
+  name: string
+  level: 'category' | 'group'
+  full: ScenarioKey | null
+  wasted: number
+}
+
+function NodeName({ id, name, level, full, wasted }: NodeNameProps) {
+  return (
+    <span className={`${NAME_CELL} ${level === 'category' ? 'text-heading' : 'text-body font-medium'}`}>
+      <span className="mr-1.5 text-xs font-medium text-fg-subtle">{id}</span>
+      {name}
+      {full && (
+        <span title={FULL_TITLE[full]} className="ml-2 text-xs font-normal whitespace-nowrap text-fg-subtle">
+          · đầy<span className="sr-only">: {FULL_TITLE[full]}</span>
         </span>
-      ))}
-      <span className="text-fg-subtle">/ {max}</span>
+      )}
+      {wasted > 0 && (
+        <span
+          title="Tổng điểm các tiêu chí vượt trần (nếu làm hết dự định). Nên chuyển bớt hoạt động sang nhóm khác."
+          className="ml-2 text-xs font-normal whitespace-nowrap text-fg-muted"
+        >
+          <span aria-hidden className={SCENARIO_META.projected.text}>
+            ⚠
+          </span>{' '}
+          phí {wasted} điểm
+        </span>
+      )}
     </span>
   )
 }
 
-function Tags({ at, wasted }: { at: ScenarioKey | null; wasted: number }) {
+/** "10 /25 ◐+6 ○+3": điểm hiện tại, trần, rồi phần cộng thêm của từng kịch bản (bỏ trống nếu bằng 0). */
+function Numbers({ values, max, strong, className = '' }: { values: Values; max: number; strong?: boolean; className?: string }) {
   return (
-    <>
-      {at && (
-        <Badge tone={SCENARIO_META[at].tone} icon={SCENARIO_META[at].icon} title={FULL_TITLE[at]}>
-          Đầy<span className="sr-only">: {FULL_TITLE[at]}</span>
-        </Badge>
-      )}
-      {wasted > 0 && (
-        <Badge icon="⚠" title="Tổng điểm các tiêu chí vượt trần (nếu làm hết kế hoạch). Nên chuyển bớt hoạt động sang nhóm khác.">
-          phí {wasted} điểm
-        </Badge>
-      )}
-    </>
+    <span className={`flex items-baseline justify-end tabular-nums ${className}`}>
+      <span className={`w-7 text-right ${strong ? 'font-semibold' : 'font-medium'}`}>
+        <span className="sr-only">{SCENARIO_META.confirmed.long} </span>
+        {fmt(values.confirmed)}
+      </span>
+      <span className="w-9 pl-1 text-small text-fg-subtle">
+        <span className="sr-only">trên </span>/{fmt(max)}
+      </span>
+      <Delta k="done" value={values.done - values.confirmed} />
+      <Delta k="projected" value={values.projected - values.done} />
+    </span>
   )
 }
 
-const BORDER = {
-  confirmed: 'border-l-confirmed-bar',
-  joined: 'border-l-joined-bar',
-  planned: 'border-l-planned-bar',
-  rejected: 'border-l-transparent',
-  excluded: 'border-l-rejected-bar',
-  none: 'border-l-transparent',
+function Delta({ k, value }: { k: ScenarioKey; value: number }) {
+  if (value === 0) return <span aria-hidden className="w-10 sm:w-11" />
+  const m = SCENARIO_META[k]
+  const text = `${value > 0 ? '+' : '−'}${Math.abs(value)}`
+  return (
+    <span title={`${text} ${m.delta}`} className={`w-10 text-right text-small font-medium sm:w-11 ${m.text}`}>
+      <span aria-hidden className="mr-0.5 text-xs">
+        {m.icon}
+      </span>
+      {text}
+      <span className="sr-only"> {m.delta}</span>
+    </span>
+  )
 }
+
+// ---------- Dòng tiêu chí ----------
 
 interface RowProps {
   criterion: Criterion
   info: CriterionInfo
   /** Được chọn nhưng không được tính vì đã có mức loại trừ cao hơn. */
   superseded: boolean
+  /** Làm mờ tiêu chí chưa có hoạt động; tắt khi đang lọc "Còn trống" vì lúc đó chúng là nội dung chính. */
+  dimEmpty: boolean
   open: boolean
   onToggleOpen: () => void
   onToggleExcluded: () => void
 }
 
-function CriterionRow({ criterion: c, info, superseded, open, onToggleOpen, onToggleExcluded }: RowProps) {
-  const state = info.excluded ? 'excluded' : (info.best ?? 'none')
+function CriterionRow({ criterion: c, info, superseded, dimEmpty, open, onToggleOpen, onToggleExcluded }: RowProps) {
+  const state = info.excluded ? 'excluded' : (info.best ?? 'empty')
+  const empty = state === 'empty' && dimEmpty
   const detailId = `tc-${c.id}`
+  const notes = [
+    info.chosenBy.length > 1 && 'trùng, chỉ tính 1 lần',
+    superseded && 'không tính vì đã có mức cao hơn',
+    info.elsewhere.length > 0 && `${info.elsewhere.length} hoạt động khác có thể dùng`,
+  ].filter(Boolean)
   return (
     <li data-node={c.id} data-state={state}>
       <button
@@ -295,24 +343,31 @@ function CriterionRow({ criterion: c, info, superseded, open, onToggleOpen, onTo
         aria-expanded={open}
         aria-controls={detailId}
         onClick={onToggleOpen}
-        className={`flex w-full items-start gap-2 border-l-4 px-3 py-2 text-left hover:bg-surface ${BORDER[state]}`}
+        className="flex w-full items-start gap-3 rounded-md px-2 py-2 text-left hover:bg-surface sm:py-1.5"
       >
-        <StateChip state={state} />
-        <span className="min-w-0 flex-1">
-          <span className="text-sm">
-            <span className="font-mono text-fg-subtle">{c.id}</span> {c.name}
-          </span>
-          {(info.chosenBy.length > 0 || info.elsewhere.length > 0 || superseded) && (
-            <span className="mt-0.5 block text-xs text-fg-muted">
-              {info.chosenBy.length > 0 && <>← {info.chosenBy.map((a) => a.name).join(', ')}</>}
-              {info.chosenBy.length > 1 && <> (trùng, chỉ tính 1 lần)</>}
-              {superseded && <> · không tính vì đã có mức cao hơn</>}
-              {info.chosenBy.length > 0 && info.elsewhere.length > 0 && ' · '}
-              {info.elsewhere.length > 0 && <>{info.elsewhere.length} hoạt động khác có thể dùng</>}
-            </span>
-          )}
+        <span className="flex size-5 shrink-0 items-center justify-center">
+          {state === 'excluded' ? (
+            <StatusIcon tone="rejected" icon="✕" label="Đã đánh dấu không đạt" />
+          ) : state !== 'empty' ? (
+            <StatusIcon tone={state} icon={STATUS_META[state].icon} label={STATUS_META[state].label} />
+          ) : null}
         </span>
-        <span className={`shrink-0 text-sm tabular-nums ${info.excluded ? 'text-fg-subtle line-through' : ''}`}>
+        <span className={`hidden w-12 shrink-0 pt-0.5 text-xs sm:block ${empty ? 'text-fg-disabled' : 'text-fg-subtle'}`}>{c.id}</span>
+        <span className="min-w-0 flex-1">
+          <span className={`block ${empty || state === 'excluded' ? 'text-fg-subtle' : 'text-fg'}`}>
+            <span className={`mr-1.5 text-xs sm:hidden ${empty ? 'text-fg-disabled' : 'text-fg-subtle'}`}>{c.id}</span>
+            {c.name}
+          </span>
+          {info.chosenBy.length > 0 && (
+            <span className="mt-0.5 block text-small text-fg-muted">{info.chosenBy.map((a) => a.name).join(', ')}</span>
+          )}
+          {notes.length > 0 && <span className="mt-0.5 block text-xs text-fg-subtle">{notes.join(' · ')}</span>}
+        </span>
+        <span
+          className={`w-8 shrink-0 text-right tabular-nums ${
+            empty ? 'text-fg-subtle' : state === 'excluded' || superseded ? 'text-fg-subtle line-through' : 'font-medium'
+          }`}
+        >
           {c.points > 0 ? `+${c.points}` : `−${-c.points}`}
         </span>
       </button>
@@ -321,65 +376,45 @@ function CriterionRow({ criterion: c, info, superseded, open, onToggleOpen, onTo
   )
 }
 
-function StateChip({ state }: { state: keyof typeof BORDER }) {
-  if (state === 'excluded')
-    return (
-      <Badge tone="rejected" icon="✕" className="mt-0.5">
-        Loại trừ
-      </Badge>
-    )
-  if (state === 'none' || state === 'rejected')
-    return (
-      <Badge icon="·" className="mt-0.5">
-        Trống
-      </Badge>
-    )
-  return <StatusBadge status={state} className="mt-0.5" />
-}
-
 function CriterionDetail({ id, info, onToggleExcluded }: { id: string; info: CriterionInfo; onToggleExcluded: () => void }) {
   return (
-    <div id={id} className="space-y-2 bg-surface px-3 py-3 pl-6 text-sm">
+    <div id={id} className="mx-2 mt-1 mb-2 space-y-3 rounded-md bg-surface p-3 text-small sm:ml-[6.25rem]">
       {info.eligible.length === 0 ? (
         <p className="text-fg-subtle">Chưa có hoạt động nào có thể dùng tiêu chí này.</p>
       ) : (
         <div>
-          <div className="text-fg-subtle">Hoạt động có thể dùng:</div>
-          <ul className="mt-1 space-y-1">
+          <div className="text-fg-subtle">Hoạt động có thể dùng</div>
+          <ul className="mt-1.5 space-y-1.5">
             {info.eligible.map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={a.status} />
-                <span>{a.name}</span>
+              <li key={a.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <StatusIcon tone={a.status} icon={STATUS_META[a.status].icon} label={STATUS_META[a.status].label} />
+                <span className="text-fg">{a.name}</span>
                 <span className="text-xs text-fg-subtle">
-                  {a.chosen === null ? 'chưa chọn tiêu chí' : info.chosenBy.includes(a) ? 'đang chọn tiêu chí này' : `đang chọn ${a.chosen}`}
+                  {a.chosen === null ? 'chưa chọn tiêu chí' : info.chosenBy.includes(a) ? 'đang dùng cho tiêu chí này' : `đang dùng cho ${a.chosen}`}
                 </span>
               </li>
             ))}
           </ul>
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {info.excluded ? (
           <Button size="sm" onClick={onToggleExcluded}>
-            Bỏ loại trừ
+            Bỏ đánh dấu không đạt
           </Button>
         ) : info.excludedOverridden ? (
           <>
-            <span className="text-fg-muted">
-              Tiêu chí này nằm trong danh sách loại trừ nhưng đang được chọn nên vẫn được tính.
-            </span>
+            <span className="text-fg-muted">Tiêu chí này nằm trong danh sách không đạt nhưng đang được chọn nên vẫn được tính.</span>
             <Button size="sm" onClick={onToggleExcluded}>
-              Bỏ khỏi danh sách loại trừ
+              Bỏ khỏi danh sách không đạt
             </Button>
           </>
         ) : (
           <>
             <Button size="sm" onClick={onToggleExcluded} disabled={info.chosenBy.length > 0}>
-              ✕ Đánh dấu không đạt được
+              Đánh dấu không đạt
             </Button>
-            {info.chosenBy.length > 0 && (
-              <span className="text-fg-subtle">Đang có hoạt động chọn tiêu chí này.</span>
-            )}
+            {info.chosenBy.length > 0 && <span className="text-fg-subtle">Đang có hoạt động chọn tiêu chí này.</span>}
           </>
         )}
       </div>
