@@ -6,11 +6,11 @@ Web app một trang giúp sinh viên Đại học Bách khoa Hà Nội quản l�
 
 - **Nhập hoạt động một lần.** Mỗi hoạt động gồm tên, các tiêu chí nó có thể được tính, tiêu chí định chọn và trạng thái (dự định / đã tham gia / đã xác nhận / không được).
 - **Tự tính điểm** theo bộ tiêu chí của trường, có trần ở mọi tầng: tiêu chí → nhóm → mục lớn → tổng 100. App cho biết điểm ở ba kịch bản:
-  - **Hiện tại:** chỉ tính hoạt động đã được hệ thống xác nhận.
-  - **Nếu đã tham gia được tính:** cộng thêm các hoạt động đã làm nhưng chưa được xác nhận.
-  - **Nếu làm hết kế hoạch:** cộng thêm cả các hoạt động định làm.
-- **Nhìn là biết cần tập trung vào đâu.** Thanh tiến độ xếp chồng xanh lá / xanh dương / vàng; nhãn "Đầy" khi nhóm đã chạm trần, "phí N điểm" khi nhóm vượt trần; xếp loại kèm "còn N điểm nữa lên mức trên".
-- **Gợi ý cách gán tiêu chí cho điểm cao nhất.** Mỗi hoạt động chỉ được tính cho một tiêu chí. App thử các cách gán và chỉ ra nên đổi hoạt động nào sang tiêu chí nào. App cũng liệt kê các nhóm còn trống nhiều điểm nhất, để bạn biết nên tìm loại hoạt động nào tiếp theo.
+  - **Điểm hiện tại:** chỉ tính hoạt động đã được hệ thống xác nhận.
+  - **Nếu được xác nhận hết:** cộng thêm các hoạt động đã tham gia nhưng chưa được xác nhận.
+  - **Nếu làm hết dự định:** cộng thêm cả các hoạt động định làm.
+- **Nhìn là biết cần tập trung vào đâu.** Một con số chính là điểm hiện tại, kèm xếp loại và "còn N điểm nữa lên mức trên". Mỗi mục có thanh tiến độ xếp chồng xanh lá (đã xác nhận) / xanh dương (chờ xác nhận) / vàng (dự định), cạnh đó là điểm dạng `10 /25 ◐+6`.
+- **Gợi ý cách gán tiêu chí cho điểm cao nhất.** Mỗi hoạt động chỉ được tính cho một tiêu chí. App thử các cách gán và chỉ ra nên đổi gì, ví dụ "Đổi II.2.c → II.2.b: +6 điểm". App cũng liệt kê các mục và nhóm còn lấy được nhiều điểm nhất, để bạn biết nên tìm loại hoạt động nào tiếp theo.
 
 Không có máy chủ, không cần đăng nhập. Dữ liệu chỉ nằm trên máy bạn.
 
@@ -20,17 +20,20 @@ Không có máy chủ, không cần đăng nhập. Dữ liệu chỉ nằm trên
 
 | Màn hình | Dùng để |
 |---|---|
-| **Trạng thái ĐRL** (mặc định) | Xem tổng điểm ba kịch bản, điểm theo từng mục và nhóm, từng tiêu chí đang được hoạt động nào dùng. Bấm vào một tiêu chí để xem các hoạt động có thể dùng nó, hoặc đánh dấu "không đạt được" (loại trừ), ví dụ khi bạn không có chứng chỉ TOEIC. |
-| **Hoạt động** | Thêm hoạt động theo thứ tự: tên → tiêu chí có thể dùng → tiêu chí định chọn (mỗi lựa chọn hiện "+N điểm", mặc định chọn lựa chọn nhiều điểm nhất) → trạng thái. Sửa trực tiếp trên danh sách. Cảnh báo (chọn trùng tiêu chí, quên chọn tiêu chí…) hiện ngay trên dòng tương ứng. |
-| **Gợi ý** | Bấm "Tính gợi ý" để xem bảng thay đổi đề xuất. Áp dụng tất cả hoặc từng dòng; áp dụng xong vẫn hoàn tác được. |
+| **Trạng thái ĐRL** (mặc định) | Xem điểm hiện tại và hai kịch bản còn lại, rồi điểm theo từng mục. Bấm vào một mục để mở các nhóm và tiêu chí bên trong; mục còn trống điểm được mở sẵn. Tiêu chí đã có hoạt động mang icon trạng thái và tên hoạt động; tiêu chí chưa có hoạt động hiện mờ. Bấm vào một tiêu chí để xem các hoạt động có thể dùng nó, hoặc **đánh dấu không đạt** (ví dụ khi bạn không có chứng chỉ TOEIC). Nút **Tất cả / Còn trống** lọc chỉ các tiêu chí chưa có hoạt động. |
+| **Hoạt động** | Danh sách hoạt động: trạng thái, tên, tiêu chí đang tính và số điểm hoạt động đó đóng góp. Lọc theo trạng thái, sắp xếp theo thứ tự nhập, trạng thái, tên, ngày hoặc điểm. Bấm **+ Thêm hoạt động** hoặc bấm vào một dòng để mở panel bên phải, nhập theo thứ tự: tên → tiêu chí có thể dùng → tính cho tiêu chí (mỗi lựa chọn hiện tên đầy đủ và số điểm, mặc định chọn lựa chọn nhiều điểm nhất) → trạng thái → ngày, link, ghi chú. Bấm **Lưu** mới ghi. Cảnh báo (chọn trùng tiêu chí, quên chọn tiêu chí…) hiện ngay dưới dòng tương ứng. |
+| **Gợi ý** | Tự tính khi mở. Mỗi dòng đề xuất có dạng "Đổi X → Y: +N điểm"; áp dụng tất cả hoặc từng dòng. Bên dưới là "Nên tìm thêm hoạt động ở đâu": các mục và nhóm còn lấy được điểm, xếp từ nhiều đến ít. Các nhóm cùng một mục dùng chung phần điểm còn lại của mục, nên không cộng dồn. |
 
-Hoạt động **đã xác nhận**, **đã ghim** (📌) hoặc **không được** thì bộ gợi ý không đụng tới.
+Hoạt động **đã xác nhận**, **đã ghim** (bật "Ghim tiêu chí đã chọn" trong panel) hoặc **không được** thì bộ gợi ý không đụng tới.
+
+Mỗi thao tác sửa dữ liệu (lưu, thêm, xoá hoạt động, đánh dấu không đạt, áp dụng gợi ý) hiện một thông báo ngắn ở đáy màn hình, kèm nút **Hoàn tác** trong vài giây. Chuyển qua lại giữa ba màn hình không làm mất vị trí cuộn hay các mục đang mở.
 
 ### Lưu dữ liệu
 
 - **Bản nháp tự động.** Mọi thay đổi được lưu ngay vào trình duyệt (localStorage), mỗi học kỳ một bản. Mở lại app thì tự nạp bản nháp gần nhất.
-- **File JSON là bản lưu chính thức.** Bấm **Tải xuống** (hoặc Ctrl/⌘ + S) để lưu file `drl-<học kỳ>-<ngày giờ>.json`. Thanh trên cùng hiện chấm "Chưa tải xuống" khi có thay đổi mới. App cũng nhắc khi bạn đóng tab lúc còn thay đổi chưa tải xuống.
-- **Tải lên.** Bấm **Tải lên** hoặc kéo thả file vào cửa sổ. App kiểm tra file. Nếu file hợp lệ, app cho xem trước số hoạt động và điểm, rồi mới thay dữ liệu hiện tại. Nếu file lỗi, app báo rõ vị trí lỗi bằng tiếng Việt (ví dụ `activities[3].status`) và không đụng vào dữ liệu đang có.
+- **File JSON là bản lưu chính thức.** Bấm **Tải xuống** (hoặc Ctrl/⌘ + S) để lưu file `drl-<học kỳ>-<ngày giờ>.json`. Thanh trên cùng thoáng hiện "Đã lưu bản nháp" sau mỗi lần ghi bản nháp, và hiện chấm "Chưa tải xuống" khi có thay đổi chưa tải xuống; nút Tải xuống khi đó chuyển sang màu đậm. App cũng nhắc khi bạn đóng tab lúc còn thay đổi chưa tải xuống.
+- **Tải lên.** Mở menu **⋯** ở góc phải thanh trên cùng, chọn **Tải lên file JSON…**, hoặc kéo thả file vào cửa sổ. App kiểm tra file. Nếu file hợp lệ, app cho xem trước số hoạt động và điểm, rồi mới thay dữ liệu hiện tại. Nếu file lỗi, app báo rõ vị trí lỗi bằng tiếng Việt (ví dụ `activities[3].status`) và không đụng vào dữ liệu đang có.
+- **Học kỳ khác.** Menu **⋯ → Tạo dữ liệu học kỳ mới…** tạo dữ liệu trống cho một học kỳ; ô học kỳ trên thanh trên cùng chuyển qua lại giữa các học kỳ đã có bản nháp. Rubric đang dùng hiện ở đầu menu ⋯.
 - **Chế độ ẩn danh, hoặc trình duyệt chặn lưu trữ.** App vẫn chạy bình thường, nhưng hiện cảnh báo "Dữ liệu sẽ mất khi đóng tab, nhớ tải xuống".
 
 > Xoá dữ liệu trình duyệt là mất bản nháp. Hãy tải xuống file JSON sau mỗi lần cập nhật quan trọng.
@@ -45,7 +48,10 @@ Bấm `?` trong app để xem bảng phím tắt.
 | Ctrl + Y, ⌘ + Shift + Z | Làm lại |
 | Ctrl/⌘ + S | Tải xuống file JSON |
 | Alt + 1 / 2 / 3 | Chuyển màn hình Trạng thái / Hoạt động / Gợi ý |
-| Esc | Đóng hộp thoại |
+| Enter | Lưu panel thêm / sửa hoạt động (khi đang ở ô nhập một dòng) |
+| Esc | Đóng hộp thoại, panel hoặc menu |
+
+Nút hoàn tác / làm lại ở thanh trên cùng có tooltip kèm phím tắt.
 
 ## Chạy trên máy
 
@@ -60,6 +66,8 @@ npm run build      # build production vào dist/
 npm run preview    # xem thử bản build
 ```
 
+Muốn thử nhanh: mở app, bấm **Tải lên file JSON**, rồi chọn `data/samples/2026.1.json`. Màn Trạng thái phải hiện điểm hiện tại **42**, "Nếu được xác nhận hết" **60** và "Nếu làm hết dự định" **63**.
+
 ### Deploy
 
 Mỗi lần push lên `main`, GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) chạy test, build với base path `/<tên repo>/` rồi đưa bản build lên GitHub Pages. Có thể chạy lại bằng tay ở tab **Actions → Deploy GitHub Pages → Run workflow**.
@@ -70,8 +78,6 @@ Muốn thử bản build với base path giống trên Pages:
 BASE_PATH=/hust-drl-management/ npm run build
 BASE_PATH=/hust-drl-management/ npm run preview   # http://localhost:4173/hust-drl-management/
 ```
-
-Muốn thử nhanh: mở app, bấm **Tải lên file JSON**, rồi chọn `data/samples/2026.1.json`. Ba thẻ tổng phải hiện **42 / 60 / 63**.
 
 ## Định dạng file JSON
 
@@ -192,19 +198,24 @@ Bộ tiêu chí là dữ liệu, không nằm trong code. Mỗi phiên bản là
 schema/          JSON Schema cho rubric và dữ liệu người dùng
 data/rubrics/    các bộ tiêu chí
 data/samples/    dữ liệu mẫu + kết quả kỳ vọng (dùng trong test)
-docs/            SPEC.md (đặc tả nghiệp vụ), PROMPTS.md (kế hoạch triển khai)
+docs/            SPEC.md (đặc tả nghiệp vụ), DESIGN.md (thiết kế giao diện, design tokens),
+                 PROMPTS.md (kế hoạch triển khai)
 src/domain/      logic thuần, có test, không phụ thuộc React
   rubric.ts        nạp, kiểm tra, chọn rubric theo học kỳ
   schema.ts        kiểm tra JSON bằng Ajv, thông báo lỗi tiếng Việt
   scoring.ts       tính điểm 3 kịch bản
   validate.ts      cảnh báo trên dữ liệu
-  optimizer.ts     gợi ý cách gán tiêu chí (branch-and-bound), marginalGain, nhóm còn trống
+  optimizer.ts     gợi ý cách gán tiêu chí (branch-and-bound), marginalGain, điểm đóng góp
+                   của từng hoạt động, các mục/nhóm còn lấy được điểm
   activities.ts    thêm, sửa, xoá hoạt động
   overview.ts      dữ liệu dẫn xuất cho màn Trạng thái
   grading.ts       ngưỡng xếp loại (sửa ở đây nếu trường đổi)
 src/storage.ts   bản nháp localStorage, tải xuống/tải lên JSON
 src/state.ts     state của app + undo/redo
-src/ui/          các component React
+src/ui/          các màn hình React
+  kit/             component dùng chung (Button, Badge, ProgressBar, Sheet, Menu, Toast…)
+src/index.css    design tokens (Tailwind v4 @theme), chỉ có giao diện sáng
+.github/workflows/deploy.yml   build và deploy lên GitHub Pages
 ```
 
 Stack: Vite, React 19, TypeScript (strict), Tailwind CSS v4, Ajv, Vitest.
