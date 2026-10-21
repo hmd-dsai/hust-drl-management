@@ -240,7 +240,11 @@ export function App() {
           }
         />
       ) : tab === 'activities' ? (
-        <ActivitiesScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
+        <ActivitiesScreen
+          data={doc.data}
+          onEdit={(recipe) => dispatch({ type: 'edit', recipe })}
+          onUndo={() => dispatch({ type: 'undo' })}
+        />
       ) : (
         <SuggestScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
       )}

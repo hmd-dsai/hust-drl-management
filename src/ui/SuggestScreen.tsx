@@ -5,7 +5,7 @@ import { applyChanges, openGroups, optimize, type Change, type OptimizeResult } 
 import { resolveRubric, rubricIndex } from '../domain/rubric.ts'
 import { SCENARIO_KEYS, SCENARIOS } from '../domain/scoring.ts'
 import type { UserData } from '../domain/types.ts'
-import { formatGain } from './ChosenSelect.tsx'
+import { formatGain } from './format.ts'
 import { Badge, Button, Card, StatusBadge } from './kit/index.ts'
 import { SCENARIO_META, TONE } from './status.ts'
 

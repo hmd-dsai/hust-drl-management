@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import sample from '../../data/samples/2026.1.json'
-import { applyChanges, bestChoice, createFastScorer, marginalGain, openGroups, optimize, rankChoices } from './optimizer.ts'
+import { applyChanges, bestChoice, contribution, createFastScorer, marginalGain, openGroups, optimize, rankChoices } from './optimizer.ts'
 import { getRubric } from './rubric.ts'
 import { computeScenarios } from './scoring.ts'
 import type { Activity, Rubric, Status, UserData } from './types.ts'
@@ -387,5 +387,32 @@ describe('optimize = vét cạn trên dữ liệu ngẫu nhiên nhỏ', () => {
         expect([res.after.projected, res.after.done, res.changes.length], JSON.stringify(user0)).toEqual([best.p, best.d, best.c])
       }
     }
+  })
+})
+
+describe('contribution — điểm hoạt động đang đóng góp', () => {
+  const withActivities = (activities: Activity[]): UserData => ({ ...user, activities })
+
+  it('tiêu chí riêng, chưa chạm trần: đúng bằng điểm tiêu chí', () => {
+    expect(contribution(rubric, user, 'xuat-sac-2025-2')).toBe(6)
+    expect(contribution(rubric, user, 'tot-2025-2')).toBe(4)
+  })
+
+  it('hoạt động joined vẫn tính theo kịch bản "làm hết kế hoạch": II.2 từ 12 xuống 6', () => {
+    expect(contribution(rubric, user, 'tham-gia-ai-thuc-chien-2026')).toBe(6)
+  })
+
+  it('hai hoạt động cùng chọn một tiêu chí: bỏ riêng cái nào cũng không mất điểm → 0', () => {
+    const dup = withActivities([...user.activities, { ...existing('su-dung-ptcc'), id: 'trung' }])
+    expect(contribution(rubric, dup, 'su-dung-ptcc')).toBe(0)
+    expect(contribution(rubric, dup, 'trung')).toBe(0)
+  })
+
+  it('rejected, chưa chọn tiêu chí, id không tồn tại → 0', () => {
+    const rejected = withActivities(user.activities.map((a) => (a.id === 'tot-2025-2' ? { ...a, status: 'rejected' as Status } : a)))
+    expect(contribution(rubric, rejected, 'tot-2025-2')).toBe(0)
+    const unchosen = withActivities(user.activities.map((a) => (a.id === 'tot-2025-2' ? { ...a, chosen: null } : a)))
+    expect(contribution(rubric, unchosen, 'tot-2025-2')).toBe(0)
+    expect(contribution(rubric, user, 'khong-co')).toBe(0)
   })
 })

@@ -31,11 +31,13 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
   label: string
   /** Phím tắt hiện sau tên trong tooltip, ví dụ "Ctrl+Z". */
   shortcut?: string
+  /** `end`: tooltip canh mép phải nút, dùng khi nút nằm sát mép phải màn hình. */
+  tooltipAlign?: 'center' | 'end'
   children: ReactNode
 }
 
 /** Nút chỉ có icon, kèm tooltip hiện khi rê chuột hoặc focus bằng bàn phím. */
-export function IconButton({ label, shortcut, type = 'button', className = '', children, ...rest }: IconButtonProps) {
+export function IconButton({ label, shortcut, tooltipAlign = 'center', type = 'button', className = '', children, ...rest }: IconButtonProps) {
   return (
     <button
       type={type}
@@ -46,7 +48,7 @@ export function IconButton({ label, shortcut, type = 'button', className = '', c
       <span aria-hidden>{children}</span>
       <span
         aria-hidden
-        className="pointer-events-none absolute top-full left-1/2 z-20 mt-1.5 -translate-x-1/2 rounded-md bg-fg px-2 py-1 text-xs font-medium whitespace-nowrap text-canvas opacity-0 transition-opacity group-hover/tip:opacity-100 group-focus-visible/tip:opacity-100"
+        className={`pointer-events-none absolute top-full z-20 mt-1.5 rounded-md ${tooltipAlign === 'end' ? 'right-0' : 'left-1/2 -translate-x-1/2'} bg-fg px-2 py-1 text-xs font-medium whitespace-nowrap text-canvas opacity-0 transition-opacity group-hover/tip:opacity-100 group-focus-visible/tip:opacity-100`}
       >
         {label}
         {shortcut && <span className="ml-1.5 text-fg-disabled">{shortcut}</span>}

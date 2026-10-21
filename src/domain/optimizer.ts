@@ -28,6 +28,22 @@ export function marginalGain(rubric: Rubric, user: UserData, activity: Activity,
   return score(criterionId) - score(baseline)
 }
 
+/**
+ * Điểm "Nếu làm hết kế hoạch" mà hoạt động đang đóng góp: điểm hiện có trừ điểm khi bỏ tiêu chí của nó
+ * (giữ nguyên trạng thái thật). Bằng 0 nếu hoạt động bị rejected, chưa chọn, trùng tiêu chí với hoạt động khác
+ * hoặc nhóm/mục đã đầy; âm với hoạt động trừ điểm.
+ */
+export function contribution(rubric: Rubric, user: UserData, activityId: string): number {
+  const activity = user.activities.find((a) => a.id === activityId)
+  if (!activity || activity.chosen === null) return 0
+  const without: UserData = {
+    ...user,
+    activities: user.activities.map((a) => (a.id === activityId ? { ...a, chosen: null } : a)),
+  }
+  const score = (u: UserData) => computeScore(rubric, u, SCENARIOS.projected.statuses).capped
+  return score(user) - score(without)
+}
+
 export interface Choice {
   criterionId: string
   gain: number

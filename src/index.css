@@ -76,6 +76,13 @@
     border-color: var(--color-border);
   }
 
+  /* Tailwind v4 để con trỏ mặc định cho nút; mọi thứ bấm được đều hiện bàn tay. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;

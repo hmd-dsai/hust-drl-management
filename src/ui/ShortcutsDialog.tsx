@@ -11,7 +11,7 @@ export const SHORTCUTS: [string, string][] = [
   ['Alt + 1 / 2 / 3', 'Chuyển màn hình Trạng thái / Hoạt động / Gợi ý'],
   ['?', 'Mở bảng phím tắt này'],
   ['Esc', 'Đóng hộp thoại'],
-  ['Enter', 'Lưu ô đang sửa trong danh sách hoạt động'],
+  ['Enter', 'Lưu trong panel thêm / sửa hoạt động (khi đang ở ô nhập một dòng)'],
 ]
 
 export function ShortcutsDialog({ onClose }: { onClose: () => void }) {

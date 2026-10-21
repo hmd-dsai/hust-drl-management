@@ -81,7 +81,7 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
               <label key={c.id} className="flex cursor-pointer items-start gap-2 px-2.5 py-1 text-sm hover:bg-surface">
                 <input type="checkbox" checked={chosen.has(c.id)} onChange={() => toggle(c.id)} className="mt-1" />
                 <span className="min-w-0 flex-1">
-                  <span className="font-mono text-fg-subtle">{c.id}</span> {c.name}
+                  <span className="mr-1 text-xs text-fg-subtle">{c.id}</span> {c.name}
                   {excluded.has(c.id) && <span className="ml-1 text-xs text-rejected-fg">✕ đang loại trừ</span>}
                 </span>
                 <span className="shrink-0 tabular-nums text-fg-subtle">{c.points > 0 ? `+${c.points}` : c.points}</span>
