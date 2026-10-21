@@ -2,6 +2,8 @@
 
 Web app một trang giúp sinh viên Đại học Bách khoa Hà Nội quản lý **điểm rèn luyện (ĐRL)**. App thay cho file Google Sheet tự làm trước đây (tab Checklist và tab Plan).
 
+**Dùng ngay:** <https://hmd-dsai.github.io/hust-drl-management/>
+
 - **Nhập hoạt động một lần.** Mỗi hoạt động gồm tên, các tiêu chí nó có thể được tính, tiêu chí định chọn và trạng thái (dự định / đã tham gia / đã xác nhận / không được).
 - **Tự tính điểm** theo bộ tiêu chí của trường, có trần ở mọi tầng: tiêu chí → nhóm → mục lớn → tổng 100. App cho biết điểm ở ba kịch bản:
   - **Hiện tại:** chỉ tính hoạt động đã được hệ thống xác nhận.
@@ -56,6 +58,17 @@ npm test           # chạy test (Vitest)
 npm run typecheck  # kiểm tra kiểu TypeScript
 npm run build      # build production vào dist/
 npm run preview    # xem thử bản build
+```
+
+### Deploy
+
+Mỗi lần push lên `main`, GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) chạy test, build với base path `/<tên repo>/` rồi đưa bản build lên GitHub Pages. Có thể chạy lại bằng tay ở tab **Actions → Deploy GitHub Pages → Run workflow**.
+
+Muốn thử bản build với base path giống trên Pages:
+
+```bash
+BASE_PATH=/hust-drl-management/ npm run build
+BASE_PATH=/hust-drl-management/ npm run preview   # http://localhost:4173/hust-drl-management/
 ```
 
 Muốn thử nhanh: mở app, bấm **Tải lên file JSON**, rồi chọn `data/samples/2026.1.json`. Ba thẻ tổng phải hiện **42 / 60 / 63**.

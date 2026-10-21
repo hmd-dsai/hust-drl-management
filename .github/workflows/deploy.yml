@@ -1,0 +1,55 @@
+# Build và deploy lên GitHub Pages mỗi khi push lên main (docs/PROMPTS.md, giai đoạn 8).
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Chỉ một lần deploy chạy cùng lúc; lần mới hơn thay lần đang chờ, không huỷ lần đang chạy dở.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # `npm run build` đã chạy typecheck; test chạy riêng để lỗi hiện rõ trên GitHub.
+      - run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Base path theo tên repo, ví dụ /hust-drl-management/
+          BASE_PATH: /${{ github.event.repository.name }}/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
