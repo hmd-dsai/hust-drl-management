@@ -437,3 +437,31 @@ export function openGroups(rubric: Rubric, user: UserData): OpenGroup[] {
   })
   return out.sort((a, b) => b.room - a.room)
 }
+
+export interface OpenCategory {
+  categoryId: string
+  /** Điểm còn lấy được của cả mục (trần mục và totalMax); các nhóm bên trong dùng chung phần này. */
+  room: number
+  /** Nhóm còn trống, xếp theo `room` giảm dần; tiêu chí trong mỗi nhóm xếp điểm cao xuống. */
+  groups: OpenGroup[]
+}
+
+/**
+ * `openGroups` gom theo mục lớn, vì các nhóm cùng mục dùng chung phần còn lại của mục nên không cộng dồn được.
+ * Mục xếp theo điểm còn lấy được giảm dần (hoà thì theo thứ tự rubric).
+ */
+export function openCategories(rubric: Rubric, user: UserData): OpenCategory[] {
+  const tree = computeScenarios(rubric, user).projected
+  const totalRoom = rubric.totalMax - Math.min(tree.bonus, rubric.totalMax)
+  const groups = openGroups(rubric, user)
+  return rubric.categories
+    .map((cat, ci) => ({
+      categoryId: cat.id,
+      room: Math.min(cat.max - tree.categories[ci]!.capped, totalRoom),
+      groups: groups
+        .filter((g) => g.categoryId === cat.id)
+        .map((g) => ({ ...g, criteria: [...g.criteria].sort((a, b) => b.points - a.points) })),
+    }))
+    .filter((c) => c.groups.length > 0)
+    .sort((a, b) => b.room - a.room)
+}

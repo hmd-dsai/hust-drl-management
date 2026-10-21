@@ -1,6 +1,6 @@
 // Màn hình "Hoạt động" (SPEC mục 7.3, docs/DESIGN.md mục 4.2): danh sách chỉ để đọc, bấm một dòng để sửa trong panel.
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { removeActivity } from '../domain/activities.ts'
 import { contribution } from '../domain/optimizer.ts'
 import { resolveRubric, rubricIndex } from '../domain/rubric.ts'
@@ -9,7 +9,8 @@ import { STATUSES, type Activity, type Status, type UserData } from '../domain/t
 import { validate, type Issue } from '../domain/validate.ts'
 import { ActivityPanel } from './ActivityPanel.tsx'
 import { formatGain } from './format.ts'
-import { Button, Select, StatusIcon, Toast } from './kit/index.ts'
+import { Button, Select, StatusIcon } from './kit/index.ts'
+import type { Notify } from './notify.ts'
 import { STATUS_META, TONE } from './status.ts'
 
 type Recipe = (d: UserData) => UserData
@@ -17,7 +18,7 @@ type Recipe = (d: UserData) => UserData
 interface Props {
   data: UserData
   onEdit: (recipe: Recipe) => void
-  onUndo: () => void
+  notify: Notify
 }
 
 type Sort = 'input' | 'status' | 'name' | 'date' | 'points'
@@ -42,7 +43,7 @@ const POINTS_TITLE = 'Điểm "Nếu làm hết dự định" sẽ mất nếu b
 /** Panel đang mở: `null` = đóng, `'new'` = thêm mới, còn lại là id hoạt động đang sửa. */
 type PanelState = null | 'new' | string
 
-export function ActivitiesScreen({ data, onEdit, onUndo }: Props) {
+export function ActivitiesScreen({ data, onEdit, notify }: Props) {
   const rubric = resolveRubric(data)
   const index = rubricIndex(rubric)
   const excluded = useMemo(() => effectiveExcluded(data), [data])
@@ -52,19 +53,10 @@ export function ActivitiesScreen({ data, onEdit, onUndo }: Props) {
   const [sort, setSort] = useState<Sort>('input')
   const [panel, setPanel] = useState<PanelState>(null)
 
-  // ---- Xoá + hoàn tác ----
-  /** `data` = dữ liệu ngay sau khi xoá; đổi khác đi (sửa tiếp, Ctrl+Z…) thì không hoàn tác từ toast được nữa. */
-  const [toast, setToast] = useState<{ name: string; data: UserData | null } | null>(null)
-  useEffect(() => {
-    if (!toast) return
-    if (toast.data === null) setToast({ ...toast, data })
-    else if (toast.data !== data) setToast(null)
-  }, [data]) // chỉ phản ứng khi dữ liệu đổi
-  const dismissToast = useCallback(() => setToast(null), [])
   const remove = (a: Activity) => {
     setPanel(null)
     onEdit((d) => removeActivity(d, a.id))
-    setToast({ name: a.name, data: null })
+    notify(`Đã xoá “${a.name}”`, { undo: true })
   }
 
   const byActivity = new Map<string, Issue[]>()
@@ -169,25 +161,12 @@ export function ActivitiesScreen({ data, onEdit, onUndo }: Props) {
           excluded={excluded}
           activity={editing}
           onEdit={onEdit}
+          notify={notify}
           onDelete={remove}
           onClose={() => setPanel(null)}
         />
       )}
 
-      {toast && (
-        <Toast
-          onDismiss={dismissToast}
-          action={{
-            label: 'Hoàn tác',
-            onClick: () => {
-              setToast(null)
-              onUndo()
-            },
-          }}
-        >
-          Đã xoá “{toast.name}”
-        </Toast>
-      )}
     </main>
   )
 }
@@ -202,7 +181,7 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`rounded-md px-2.5 py-1 text-small ${active ? 'bg-surface-selected font-medium text-fg' : 'text-fg-muted hover:bg-surface hover:text-fg'}`}
+      className={`min-h-11 rounded-md px-2.5 py-1 text-small sm:min-h-0 ${active ? 'bg-surface-selected font-medium text-fg' : 'text-fg-muted hover:bg-surface hover:text-fg'}`}
     >
       {children}
     </button>

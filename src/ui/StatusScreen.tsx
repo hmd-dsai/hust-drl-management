@@ -343,7 +343,7 @@ function CriterionRow({ criterion: c, info, superseded, dimEmpty, open, onToggle
         aria-expanded={open}
         aria-controls={detailId}
         onClick={onToggleOpen}
-        className="flex w-full items-start gap-3 rounded-md px-2 py-2 text-left hover:bg-surface sm:py-1.5"
+        className="flex w-full items-start gap-3 rounded-md px-2 py-3 text-left hover:bg-surface sm:py-1.5"
       >
         <span className="flex size-5 shrink-0 items-center justify-center">
           {state === 'excluded' ? (

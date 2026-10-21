@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import sample from '../../data/samples/2026.1.json'
-import { applyChanges, bestChoice, contribution, createFastScorer, marginalGain, openGroups, optimize, rankChoices } from './optimizer.ts'
+import {
+  applyChanges,
+  bestChoice,
+  contribution,
+  createFastScorer,
+  marginalGain,
+  openCategories,
+  openGroups,
+  optimize,
+  rankChoices,
+} from './optimizer.ts'
 import { getRubric } from './rubric.ts'
 import { computeScenarios } from './scoring.ts'
 import type { Activity, Rubric, Status, UserData } from './types.ts'
@@ -414,5 +424,40 @@ describe('contribution — điểm hoạt động đang đóng góp', () => {
     const unchosen = withActivities(user.activities.map((a) => (a.id === 'tot-2025-2' ? { ...a, chosen: null } : a)))
     expect(contribution(rubric, unchosen, 'tot-2025-2')).toBe(0)
     expect(contribution(rubric, user, 'khong-co')).toBe(0)
+  })
+})
+
+describe('openCategories (sample 2026.1)', () => {
+  const cats = openCategories(rubric, user)
+
+  it('gom nhóm theo mục, mục xếp theo điểm còn lấy được của cả mục', () => {
+    // V còn 10 (20 − 10), I còn 9, III và IV còn 8 (giữ thứ tự rubric), II còn 2
+    expect(cats.map((c) => [c.categoryId, c.room])).toEqual([
+      ['V', 10],
+      ['I', 9],
+      ['III', 8],
+      ['IV', 8],
+      ['II', 2],
+    ])
+  })
+
+  it('V.1, V.2 còn 10, V.3 còn 5 nhưng cả mục V chỉ còn 10: không cộng dồn', () => {
+    const v = cats.find((c) => c.categoryId === 'V')!
+    expect(v.groups.map((g) => [g.groupId, g.room])).toEqual([
+      ['V.1', 10],
+      ['V.2', 10],
+      ['V.3', 5],
+    ])
+    expect(v.room).toBe(10)
+  })
+
+  it('nhóm trong mục xếp theo room giảm dần, tiêu chí xếp điểm cao xuống', () => {
+    const i = cats.find((c) => c.categoryId === 'I')!
+    expect(i.groups.map((g) => g.groupId)).toEqual(['I.2', 'I.1'])
+    expect(cats.find((c) => c.categoryId === 'V')!.groups[0]!.criteria.map((c) => [c.id, c.points])).toEqual([
+      ['V.1.a', 6],
+      ['V.1.b', 4],
+      ['V.1.c', 3],
+    ])
   })
 })

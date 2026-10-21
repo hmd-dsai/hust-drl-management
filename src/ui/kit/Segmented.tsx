@@ -19,7 +19,7 @@ export function Segmented<T extends string>({ value, options, onChange, classNam
           role="radio"
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
-          className={`rounded-sm px-2.5 py-1 text-small font-medium whitespace-nowrap ${
+          className={`h-11 rounded-sm px-3 text-small font-medium whitespace-nowrap sm:h-7 sm:px-2.5 ${
             value === o.value ? 'bg-canvas text-fg shadow-[0_1px_2px_rgb(0_0_0/0.08)]' : 'text-fg-muted hover:text-fg'
           }`}
         >

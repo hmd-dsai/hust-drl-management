@@ -22,7 +22,7 @@ export function Toast({ children, action, onDismiss, duration = 6000 }: Props) {
     >
       <span className="min-w-0">{children}</span>
       {action && (
-        <button type="button" onClick={action.onClick} className="shrink-0 rounded-sm px-2 py-1 font-medium text-canvas underline-offset-2 hover:underline">
+        <button type="button" onClick={action.onClick} className="min-h-11 shrink-0 rounded-sm px-2 py-1 font-medium text-canvas underline-offset-2 hover:underline focus-visible:outline-canvas sm:min-h-0">
           {action.label}
         </button>
       )}

@@ -12,9 +12,10 @@ const VARIANT: Record<Variant, string> = {
   ghost: 'text-fg-muted hover:bg-surface hover:text-fg disabled:hover:bg-transparent',
 }
 
+/** Trên điện thoại cao 44px (vùng chạm tối thiểu), desktop gọn hơn. */
 const SIZE: Record<Size, string> = {
-  sm: 'h-7 px-2.5 text-small',
-  md: 'h-8 px-3 text-body',
+  sm: 'h-11 px-3 text-small sm:h-7 sm:px-2.5',
+  md: 'h-11 px-3.5 text-body sm:h-8 sm:px-3',
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -42,7 +43,7 @@ export function IconButton({ label, shortcut, tooltipAlign = 'center', type = 'b
     <button
       type={type}
       aria-label={label}
-      className={`group/tip relative inline-flex size-8 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-surface hover:text-fg disabled:cursor-not-allowed disabled:text-fg-disabled disabled:hover:bg-transparent ${className}`}
+      className={`group/tip relative inline-flex size-11 items-center sm:size-8 justify-center rounded-md text-fg-muted transition-colors hover:bg-surface hover:text-fg disabled:cursor-not-allowed disabled:text-fg-disabled disabled:hover:bg-transparent ${className}`}
       {...rest}
     >
       <span aria-hidden>{children}</span>

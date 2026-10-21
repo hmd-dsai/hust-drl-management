@@ -50,6 +50,8 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
                   type="button"
                   onClick={() => toggle(id)}
                   title={known ? `${index.get(id)!.node.name} — bấm để bỏ` : 'Không có trong rubric — bấm để bỏ'}
+                  aria-label={`Bỏ ${id}`}
+                  className="flex min-h-11 items-center sm:min-h-0"
                 >
                   <Badge tone={known ? 'neutral' : 'rejected'} className="hover:opacity-80">
                     {id} ✕
@@ -68,7 +70,7 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
         aria-label="Tìm tiêu chí"
         aria-controls={listId}
         autoFocus={autoFocus}
-        className="block w-full border-b border-border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-fg-subtle"
+        className="block w-full border-b border-border bg-transparent px-2.5 py-[11px] text-base placeholder:text-fg-subtle sm:py-1.5 sm:text-sm"
       />
       <div id={listId} className="max-h-64 overflow-auto">
         {sections.length === 0 && <p className="p-2 text-sm text-fg-subtle">Không tìm thấy tiêu chí nào.</p>}
@@ -78,7 +80,7 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
               {cat.id}. {cat.name}
             </legend>
             {criteria.map((c) => (
-              <label key={c.id} className="flex cursor-pointer items-start gap-2 px-2.5 py-1 text-sm hover:bg-surface">
+              <label key={c.id} className="flex cursor-pointer items-start gap-2 px-2.5 py-3 text-sm hover:bg-surface sm:py-1">
                 <input type="checkbox" checked={chosen.has(c.id)} onChange={() => toggle(c.id)} className="mt-1" />
                 <span className="min-w-0 flex-1">
                   <span className="mr-1 text-xs text-fg-subtle">{c.id}</span> {c.name}

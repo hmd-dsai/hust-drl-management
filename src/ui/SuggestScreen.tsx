@@ -1,105 +1,123 @@
-// Màn hình "Gợi ý" (SPEC mục 7.4): tối ưu cách gán tiêu chí, bảng diff, áp dụng tất cả / từng dòng, nhóm còn trống.
+// Màn hình "Gợi ý" (SPEC mục 7.4, docs/DESIGN.md mục 4.3): kết quả tối ưu dạng "đổi X → Y: +N điểm",
+// áp dụng tất cả / từng dòng, và các nhóm còn lấy được điểm gom theo mục.
 
 import { useEffect, useMemo, useState } from 'react'
-import { applyChanges, openGroups, optimize, type Change, type OptimizeResult } from '../domain/optimizer.ts'
+import { applyChanges, openCategories, optimize, type Change, type OptimizeResult } from '../domain/optimizer.ts'
 import { resolveRubric, rubricIndex } from '../domain/rubric.ts'
-import { SCENARIO_KEYS, SCENARIOS } from '../domain/scoring.ts'
-import type { UserData } from '../domain/types.ts'
+import type { Activity, UserData } from '../domain/types.ts'
 import { formatGain } from './format.ts'
-import { Badge, Button, Card, StatusBadge } from './kit/index.ts'
-import { SCENARIO_META, TONE } from './status.ts'
+import { Button, StatusIcon } from './kit/index.ts'
+import type { Notify } from './notify.ts'
+import { SCENARIO_META, STATUS_META, TONE } from './status.ts'
 
 interface Props {
   data: UserData
+  /** Đang hiển thị: chỉ tính lại khi người dùng nhìn thấy màn hình này. */
+  active: boolean
   onEdit: (recipe: (d: UserData) => UserData) => void
+  notify: Notify
 }
 
 type Run = { data: UserData; res: OptimizeResult }
-/** Lần tính gần nhất, giữ qua các lần chuyển tab trong phiên (chỉ là cache của giá trị tính ra). */
-let lastRun: Run | null = null
 
-const OPEN_GROUPS_SHOWN = 8
-const CRITERIA_PER_GROUP = 3
+const CRITERIA_SHOWN = 3
 
-export function SuggestScreen({ data, onEdit }: Props) {
+export function SuggestScreen({ data, active, onEdit, notify }: Props) {
   const rubric = resolveRubric(data)
   const index = rubricIndex(rubric)
-  const [result, setResultState] = useState<Run | null>(lastRun)
-  const setResult = (r: Run) => {
-    lastRun = r
-    setResultState(r)
-  }
+  const name = (id: string | null) => (id === null ? '' : (index.get(id)?.node.name ?? 'Không có trong rubric'))
+  const [run, setRun] = useState<Run | null>(null)
   const [computing, setComputing] = useState(false)
 
-  const run = (d: UserData) => {
+  const compute = (d: UserData) => {
     setComputing(true)
     // nhường một khung hình để hiện "Đang tính…" trước khi chạy (đồng bộ, tối đa vài trăm ms)
     setTimeout(() => {
-      setResult({ data: d, res: optimize(resolveRubric(d), d) })
+      setRun({ data: d, res: optimize(resolveRubric(d), d) })
       setComputing(false)
     }, 0)
   }
-  // Dữ liệu đổi (áp dụng một dòng, hoàn tác, sửa ở màn khác, quay lại tab) thì tính lại cho khớp.
+  // Tự tính khi mở màn hình và mỗi khi dữ liệu đổi trong lúc đang xem (Q5 trong DESIGN.md).
   useEffect(() => {
-    if (result && result.data !== data && !computing) run(data)
-  }, [data])
+    if (active && run?.data !== data && !computing) compute(data)
+  }, [active, data]) // chỉ phản ứng khi mở màn hình hoặc dữ liệu đổi
 
-  const groups = useMemo(() => openGroups(rubric, data), [rubric, data])
-  const fresh = result?.data === data ? result.res : null
-  const name = (id: string | null) => (id === null ? null : (index.get(id)?.node.name ?? 'không có trong rubric'))
+  const res = run?.data === data ? run.res : null
+  const cats = useMemo(() => openCategories(rubric, data), [rubric, data])
   const activity = (id: string) => data.activities.find((a) => a.id === id)!
 
+  const apply = (changes: Change[]) => {
+    onEdit((d) => applyChanges(d, changes))
+    notify(changes.length === 1 ? `Đã đổi tiêu chí cho “${activity(changes[0]!.activityId).name}”` : `Đã áp dụng ${changes.length} thay đổi`, {
+      undo: true,
+    })
+  }
+
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-6">
+    <main className="mx-auto max-w-[960px] space-y-12 px-4 pt-8 pb-24 sm:px-8">
       <section aria-labelledby="goi-y" className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 id="goi-y" className="text-heading">
-            Gợi ý cách gán tiêu chí
-          </h2>
-          <Button variant="primary" onClick={() => run(data)} disabled={computing}>
-            {computing ? 'Đang tính…' : result ? 'Tính lại' : 'Tính gợi ý'}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 id="goi-y" className="text-title">
+              Gợi ý gán tiêu chí
+            </h1>
+            <p className="mt-1 text-small text-fg-muted">Đổi tiêu chí cho các hoạt động chưa xác nhận để được nhiều điểm nhất.</p>
+          </div>
+          <Button onClick={() => compute(data)} disabled={computing}>
+            {computing ? 'Đang tính…' : 'Tính lại'}
           </Button>
         </div>
-        <p className="text-sm text-fg-muted">
-          Tìm cách gán tiêu chí cho các hoạt động dự định và đã tham gia để điểm "Nếu làm hết kế hoạch" cao nhất, rồi đến
-          điểm "Nếu đã tham gia được tính", và đổi ít nhất có thể. Hoạt động đã xác nhận, đã ghim hoặc không được thì
-          giữ nguyên; tiêu chí bị loại trừ thì bỏ qua.
-        </p>
 
-        {fresh && <Result res={fresh} name={name} activity={activity} onEdit={onEdit} />}
+        <details className="group text-small text-fg-muted">
+          <summary className="inline-flex min-h-11 list-none items-center gap-1.5 text-fg-subtle hover:text-fg sm:min-h-0 [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="transition-transform group-open:rotate-90">
+              ▸
+            </span>
+            Cách tính
+          </summary>
+          <p className="mt-2 max-w-prose">
+            Ưu tiên điểm "{SCENARIO_META.projected.long}", rồi đến điểm "{SCENARIO_META.done.long}", rồi đổi ít nhất có thể.
+            Hoạt động đã xác nhận, đã ghim hoặc không được thì giữ nguyên; tiêu chí đã đánh dấu không đạt thì bỏ qua. Điểm
+            ghi ở mỗi dòng là điểm tăng thêm nếu chỉ áp dụng riêng dòng đó.
+          </p>
+        </details>
+
+        {res === null ? (
+          <p className="text-body text-fg-subtle">Đang tính…</p>
+        ) : (
+          <Result res={res} name={name} activity={activity} onApply={apply} />
+        )}
       </section>
 
-      <section aria-labelledby="nhom-trong">
-        <h2 id="nhom-trong" className="text-heading">
-          Nhóm còn trống
+      <section aria-labelledby="nen-tim">
+        <h2 id="nen-tim" className="text-heading">
+          Nên tìm thêm hoạt động ở đâu
         </h2>
-        <p className="mt-1 text-sm text-fg-muted">
-          Các nhóm còn lấy được nhiều điểm nhất nếu làm hết kế hoạch (đã tính trần nhóm, trần mục và tổng), kèm các tiêu
-          chí còn trống ít điểm nhất — gợi ý loại hoạt động nên tìm tiếp.
+        <p className="mt-1 max-w-prose text-small text-fg-muted">
+          Số điểm còn lấy được nếu làm hết dự định. Các nhóm trong cùng một mục dùng chung phần còn lại của mục, nên không
+          cộng dồn.
         </p>
-        {groups.length === 0 ? (
-          <p className="mt-3 text-sm">Không còn nhóm nào trống.</p>
+        {cats.length === 0 ? (
+          <p className="mt-4 text-body">Không còn nhóm nào lấy thêm được điểm.</p>
         ) : (
-          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-            {groups.slice(0, OPEN_GROUPS_SHOWN).map((g) => (
-              <Card as="li" key={g.groupId} data-group={g.groupId} padding="sm">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-medium">
-                    <span className="font-mono">{g.groupId}</span> {index.get(g.groupId)!.node.name}
+          <ul className="mt-4 border-t border-border">
+            {cats.map((c) => (
+              <li key={c.categoryId} data-category={c.categoryId} className="border-b border-border py-4">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h3 className="text-heading">
+                    <span className="mr-1.5 text-xs font-medium text-fg-subtle">{c.categoryId}</span>
+                    {index.get(c.categoryId)!.node.name}
+                  </h3>
+                  <span className="shrink-0 text-small whitespace-nowrap text-fg-muted">
+                    còn tối đa <span className="text-body font-semibold text-fg tabular-nums">{c.room}</span>
                   </span>
-                  <Badge className="ml-auto">còn {g.room} điểm</Badge>
                 </div>
-                <ul className="mt-2 space-y-1 text-sm text-fg-muted">
-                  {g.criteria.slice(0, CRITERIA_PER_GROUP).map((c) => (
-                    <li key={c.id} className="flex gap-2">
-                      <span className="shrink-0 tabular-nums">+{Math.min(c.points, g.room)}</span>
-                      <span>
-                        <span className="font-mono">{c.id}</span> {c.name}
-                      </span>
-                    </li>
+                <ul className="mt-3 space-y-4 sm:ml-7">
+                  {c.groups.map((g) => (
+                    <OpenGroupItem key={g.groupId} group={g} groupName={name(g.groupId)} />
                   ))}
                 </ul>
-              </Card>
+              </li>
             ))}
           </ul>
         )}
@@ -108,102 +126,140 @@ export function SuggestScreen({ data, onEdit }: Props) {
   )
 }
 
+// ---------- Kết quả tối ưu ----------
+
 interface ResultProps {
   res: OptimizeResult
-  name: (id: string | null) => string | null
-  activity: (id: string) => UserData['activities'][number]
-  onEdit: Props['onEdit']
+  name: (id: string | null) => string
+  activity: (id: string) => Activity
+  onApply: (changes: Change[]) => void
 }
 
-function Result({ res, name, activity, onEdit }: ResultProps) {
-  const apply = (changes: Change[]) => onEdit((d) => applyChanges(d, changes))
+function Result({ res, name, activity, onApply }: ResultProps) {
+  const greedy = res.method === 'greedy' && (
+    <p role="status" className="text-small text-fg-muted">
+      <span aria-hidden className={TONE.planned.fg}>
+        ⚠
+      </span>{' '}
+      Có quá nhiều cách gán nên đã dừng sau {res.nodes.toLocaleString('vi-VN')} bước và dùng cách tính gần đúng. Kết quả
+      không tệ hơn hiện tại nhưng có thể chưa phải tốt nhất.
+    </p>
+  )
+
+  if (res.changes.length === 0)
+    return (
+      <div className="space-y-2">
+        <p className="flex items-center gap-2 text-body">
+          <span aria-hidden className={`text-heading ${TONE.confirmed.fg}`}>
+            ✓
+          </span>
+          {Object.keys(res.assignment).length === 0
+            ? 'Chưa có hoạt động nào để gợi ý: chỉ hoạt động dự định hoặc đã tham gia (chưa ghim) mới được đổi tiêu chí.'
+            : 'Cách gán hiện tại đã tốt nhất. Không cần đổi gì.'}
+        </p>
+        {greedy}
+      </div>
+    )
+
+  // Chỉ nhắc kịch bản có đổi; mỗi số chỉ xuất hiện một lần.
+  const deltas = (['projected', 'done'] as const)
+    .filter((k) => res.after[k] !== res.before[k])
+    .map((k) => `${formatGain(res.after[k] - res.before[k])} ${SCENARIO_META[k].long.toLowerCase()} (${res.before[k]} → ${res.after[k]})`)
+
   return (
-    <div className="space-y-4">
-      {res.method === 'greedy' && (
-        <p role="status" className="text-sm text-fg-muted">
-          <span aria-hidden className={TONE.planned.fg}>
-            ⚠
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-body">
+          <span className="font-semibold">
+            Áp dụng {res.changes.length} thay đổi
+            {deltas.length > 0 && ':'}
           </span>{' '}
-          Có quá nhiều cách gán nên đã dừng sau {res.nodes.toLocaleString('vi-VN')} bước và dùng cách tính gần đúng. Kết
-          quả không tệ hơn hiện tại nhưng có thể chưa phải tốt nhất.
+          {deltas.join(' · ')}
         </p>
-      )}
-
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {SCENARIO_KEYS.map((k) => {
-          const diff = res.after[k] - res.before[k]
-          return (
-            <Card key={k} data-scenario={k} padding="sm">
-              <dt className={`text-sm ${SCENARIO_META[k].text}`}>
-                <span aria-hidden>{SCENARIO_META[k].icon}</span> {SCENARIOS[k].label}
-              </dt>
-              <dd className="mt-1 text-2xl font-semibold tabular-nums">
-                {res.before[k]} → {res.after[k]}
-                {diff !== 0 && <span className={`ml-2 text-base ${TONE.confirmed.fg}`}>({formatGain(diff)})</span>}
-              </dd>
-            </Card>
-          )
-        })}
-      </dl>
-
-      {Object.keys(res.assignment).length === 0 ? (
-        <p className="rounded-md bg-surface p-3 text-sm text-fg-muted">
-          Chưa có hoạt động nào để gợi ý. Chỉ hoạt động dự định hoặc đã tham gia (chưa ghim) mới được đổi tiêu chí; thêm
-          chúng ở màn hình Hoạt động.
-        </p>
-      ) : res.changes.length === 0 ? (
-        <p className={`rounded-md p-3 text-sm ${TONE.confirmed.soft} ${TONE.confirmed.fg}`}>
-          ✓ Cách gán hiện tại đã tốt nhất, không cần đổi gì.
-        </p>
-      ) : (
-        <div>
-          <div className="mb-2 flex flex-wrap items-center gap-3">
-            <h3 className="text-sm font-medium">{res.changes.length} thay đổi đề xuất</h3>
-            <Button variant="primary" onClick={() => apply(res.changes)}>
-              Áp dụng tất cả
-            </Button>
-            <span className="text-xs text-fg-subtle">Áp dụng xong vẫn hoàn tác được (Ctrl+Z).</span>
-          </div>
-          <Card as="ul" padding="none" className="divide-y divide-border">
-            {res.changes.map((c) => {
-              const a = activity(c.activityId)
-              return (
-                <li key={c.activityId} data-change={c.activityId} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2">
-                  <div className="min-w-48 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <StatusBadge status={a.status} />
-                      <span className="font-medium">{a.name}</span>
-                    </div>
-                    <div className="mt-1 text-sm">
-                      <Crit id={c.from} name={name(c.from)} /> <span aria-label="đổi thành">→</span> <Crit id={c.to} name={name(c.to)} strong />
-                    </div>
-                  </div>
-                  <div
-                    className="w-28 text-right text-sm tabular-nums"
-                    title="Điểm &quot;Nếu làm hết kế hoạch&quot; tăng thêm nếu chỉ áp dụng riêng dòng này"
-                  >
-                    <span className={c.gain > 0 ? `font-medium ${TONE.confirmed.fg}` : 'text-fg-subtle'}>
-                      {formatGain(c.gain)} điểm
-                    </span>
-                    {c.gain <= 0 && <div className="text-xs text-fg-subtle">cần đi cùng dòng khác</div>}
-                  </div>
-                  <Button onClick={() => apply([c])}>Áp dụng</Button>
-                </li>
-              )
-            })}
-          </Card>
-        </div>
-      )}
+        <Button variant="primary" onClick={() => onApply(res.changes)}>
+          Áp dụng tất cả
+        </Button>
+      </div>
+      {greedy}
+      <ul className="border-t border-border">
+        {res.changes.map((c) => (
+          <ChangeRow key={c.activityId} change={c} activity={activity(c.activityId)} name={name} onApply={() => onApply([c])} />
+        ))}
+      </ul>
     </div>
   )
 }
 
-function Crit({ id, name, strong }: { id: string | null; name: string | null; strong?: boolean }) {
-  if (id === null) return <span className="text-fg-subtle">— không chọn —</span>
+function ChangeRow({ change: c, activity: a, name, onApply }: { change: Change; activity: Activity; name: (id: string | null) => string; onApply: () => void }) {
+  const verb = c.from === null ? 'Chọn' : c.to === null ? 'Bỏ' : 'Đổi'
   return (
-    <span title={name ?? undefined}>
-      <span className={`font-mono ${strong ? 'font-semibold' : 'text-fg-subtle line-through decoration-fg-disabled'}`}>{id}</span>
-      <span className="hidden text-fg-subtle sm:inline"> {name && name.length > 40 ? `${name.slice(0, 40)}…` : name}</span>
-    </span>
+    <li data-change={c.activityId} className="flex items-start gap-3 border-b border-border py-3">
+      <span className="pt-px">
+        <StatusIcon tone={a.status} icon={STATUS_META[a.status].icon} label={STATUS_META[a.status].label} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="font-medium">{a.name}</div>
+        <div className="mt-0.5 text-body">
+          {verb}{' '}
+          {c.from !== null && (
+            <span title={name(c.from)} className="text-fg-subtle line-through decoration-fg-disabled">
+              {c.from}
+            </span>
+          )}
+          {c.from !== null && c.to !== null && <span aria-label="thành"> → </span>}
+          {c.to !== null && (
+            <span title={name(c.to)} className="font-medium">
+              {c.to}
+            </span>
+          )}
+          :{' '}
+          <span className={c.gain > 0 ? `font-semibold ${TONE.confirmed.fg}` : 'text-fg-subtle'}>{formatGain(c.gain)} điểm</span>
+          {c.gain <= 0 && <span className="text-small text-fg-subtle"> (cần đi cùng dòng khác)</span>}
+        </div>
+        {c.to !== null && <div className="mt-0.5 text-small text-fg-muted">{name(c.to)}</div>}
+      </div>
+      <Button onClick={onApply} className="shrink-0">
+        Áp dụng
+      </Button>
+    </li>
+  )
+}
+
+// ---------- Nhóm còn trống ----------
+
+function OpenGroupItem({ group: g, groupName }: { group: ReturnType<typeof openCategories>[number]['groups'][number]; groupName: string }) {
+  const [all, setAll] = useState(false)
+  const shown = all ? g.criteria : g.criteria.slice(0, CRITERIA_SHOWN)
+  const hidden = g.criteria.length - shown.length
+  return (
+    <li data-group={g.groupId}>
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="text-body font-medium">
+          <span className="mr-1.5 text-xs text-fg-subtle">{g.groupId}</span>
+          {groupName}
+        </span>
+        <span className="shrink-0 text-small text-fg-muted tabular-nums">còn {g.room}</span>
+      </div>
+      <ul className="mt-1.5 space-y-1">
+        {shown.map((c) => {
+          const got = Math.min(c.points, g.room)
+          return (
+            <li key={c.id} className="flex gap-3 text-small text-fg-muted">
+              <span className="w-8 shrink-0 text-right font-medium text-fg tabular-nums">+{got}</span>
+              <span className="min-w-0">
+                <span className="mr-1.5 text-xs text-fg-subtle">{c.id}</span>
+                {c.name}
+                {got < c.points && <span className="text-fg-subtle"> (tiêu chí +{c.points}, chỉ còn lấy được {g.room})</span>}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      {hidden > 0 && (
+        <button type="button" onClick={() => setAll(true)} className="mt-1 ml-11 min-h-11 text-small text-fg-subtle hover:text-fg sm:min-h-0">
+          + {hidden} tiêu chí khác
+        </button>
+      )}
+    </li>
   )
 }

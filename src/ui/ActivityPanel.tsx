@@ -9,6 +9,7 @@ import { STATUSES, type Activity, type Rubric, type Status, type UserData } from
 import { CriterionPicker } from './CriterionPicker.tsx'
 import { formatGain } from './format.ts'
 import { Button, fieldClass, Sheet } from './kit/index.ts'
+import type { Notify } from './notify.ts'
 import { STATUS_META, TONE } from './status.ts'
 
 type Recipe = (d: UserData) => UserData
@@ -20,13 +21,14 @@ interface Props {
   /** Hoạt động đang sửa; `null` là thêm mới. */
   activity: Activity | null
   onEdit: (recipe: Recipe) => void
+  notify: Notify
   onDelete: (activity: Activity) => void
   onClose: () => void
 }
 
 const NEW_ID = '__moi__'
 
-export function ActivityPanel({ rubric, data, excluded, activity, onEdit, onDelete, onClose }: Props) {
+export function ActivityPanel({ rubric, data, excluded, activity, onEdit, notify, onDelete, onClose }: Props) {
   const editing = activity !== null
   const [name, setName] = useState(activity?.name ?? '')
   const [status, setStatus] = useState<Status>(activity?.status ?? 'planned')
@@ -70,9 +72,12 @@ export function ActivityPanel({ rubric, data, excluded, activity, onEdit, onDele
       link: extra.link.trim() || undefined,
       note: extra.note.trim() || undefined,
     }
+    // Không sửa gì thì chỉ đóng: không tạo bước undo, không báo (nút Hoàn tác sẽ hoàn tác nhầm thao tác trước đó).
+    if (editing && patchActivity(data, id, fields) === data) return onClose()
     onEdit((d) =>
       editing ? patchActivity(d, id, fields) : upsertActivity(d, stripEmpty({ id: uniqueActivityId(trimmed, d), ...fields })),
     )
+    notify(editing ? `Đã lưu “${trimmed}”` : `Đã thêm “${trimmed}”`, { undo: true })
     onClose()
   }
 
@@ -169,7 +174,7 @@ export function ActivityPanel({ rubric, data, excluded, activity, onEdit, onDele
           />
         </Field>
 
-        <label className="flex items-start gap-2 text-body">
+        <label className="flex min-h-11 items-start gap-2 text-body">
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} className="mt-1" />
           <span>
             Ghim tiêu chí đã chọn
@@ -209,7 +214,7 @@ function StatusPicker({ value, onChange }: { value: Status; onChange: (s: Status
       {STATUSES.map((s) => (
         <label
           key={s}
-          className={`relative flex cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2 py-1.5 text-body has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus ${
+          className={`relative flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2 py-1.5 text-body sm:min-h-0 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus ${
             value === s ? `border-transparent font-medium ${TONE[s].soft} ${TONE[s].fg}` : 'border-border-strong text-fg-muted hover:bg-surface'
           }`}
         >
@@ -245,7 +250,7 @@ function ChosenList({ rubric, choices, stored, value, onChange, excluded }: Chos
   const option = (id: string | null, body: ReactNode, right?: ReactNode) => (
     <label
       key={id ?? ''}
-      className={`flex cursor-pointer items-start gap-3 px-3 py-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-focus ${
+      className={`flex cursor-pointer items-start gap-3 px-3 py-3 sm:py-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-focus ${
         value === id ? 'bg-surface-selected' : 'hover:bg-surface'
       }`}
     >

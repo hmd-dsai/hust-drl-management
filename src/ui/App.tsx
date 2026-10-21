@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { resolveRubric } from '../domain/rubric.ts'
 import type { UserData } from '../domain/types.ts'
 import { initialState, reducer, type Doc } from '../state.ts'
@@ -13,15 +13,19 @@ import {
 } from '../storage.ts'
 import { ActivitiesScreen } from './ActivitiesScreen.tsx'
 import { ImportDialog, type ImportState } from './ImportDialog.tsx'
+import { Toast } from './kit/index.ts'
 import { NewDataDialog } from './NewDataDialog.tsx'
 import { StatusScreen } from './StatusScreen.tsx'
 import { SuggestScreen } from './SuggestScreen.tsx'
 import { ShortcutsDialog } from './ShortcutsDialog.tsx'
 import { TABS, TopBar, type Tab } from './TopBar.tsx'
+import type { Notify } from './notify.ts'
 import { Welcome } from './Welcome.tsx'
 
 const store = createDraftStore(browserStorage())
 const AUTOSAVE_MS = 500
+/** "Đã lưu bản nháp" hiện bao lâu trên thanh trên cùng. */
+const SAVED_HINT_MS = 1500
 const MAX_FILE_BYTES = 5_000_000
 
 const TAB_HASH: Record<Tab, string> = { status: '#/', activities: '#/hoat-dong', suggest: '#/goi-y' }
@@ -45,24 +49,56 @@ export function App() {
   const [dragging, setDragging] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
+  // ---- Tab: mỗi màn hình giữ nguyên (không unmount) sau lần mở đầu, và nhớ vị trí cuộn riêng ----
   const [tab, setTab] = useState<Tab>(tabFromHash)
+  const [visited, setVisited] = useState<ReadonlySet<Tab>>(() => new Set([tabFromHash()]))
+  const tabRef = useRef(tab)
+  const scrollByTab = useRef<Partial<Record<Tab, number>>>({})
   useEffect(() => {
-    const onHash = () => setTab(tabFromHash())
+    const onHash = () => {
+      const next = tabFromHash()
+      if (next === tabRef.current) return
+      scrollByTab.current[tabRef.current] = window.scrollY
+      tabRef.current = next
+      setTab(next)
+      setVisited((v) => (v.has(next) ? v : new Set(v).add(next)))
+    }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
+  useLayoutEffect(() => {
+    window.scrollTo(0, scrollByTab.current[tab] ?? 0)
+  }, [tab])
+
+  // ---- Thông báo ngắn ----
+  /** `after`: dữ liệu ngay sau thao tác có thể hoàn tác; dữ liệu đổi tiếp thì bỏ nút Hoàn tác (tránh hoàn tác nhầm). */
+  const [notice, setNotice] = useState<{ key: number; message: string; undo: boolean; after: UserData | null } | null>(null)
+  const notify = useCallback<Notify>((message, opts) => {
+    setNotice({ key: Date.now(), message, undo: opts?.undo ?? false, after: null })
+  }, [])
+  const dismissNotice = useCallback(() => setNotice(null), [])
+  useEffect(() => {
+    if (!notice?.undo) return
+    if (notice.after === null) setNotice({ ...notice, after: doc?.data ?? null })
+    else if (notice.after !== doc?.data) setNotice(null)
+  }, [doc?.data]) // chỉ phản ứng khi dữ liệu đổi
 
   const dirty = useMemo(() => (doc ? isDirty(doc.data, doc.savedSnapshot) : false), [doc])
 
   // ---- Bản nháp tự động: debounce, và ghi ngay khi đóng tab hoặc trước khi mở dữ liệu khác ----
   const pending = useRef<Doc | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const [justSaved, setJustSaved] = useState(false)
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const flush = useCallback(() => {
     clearTimeout(timer.current)
     const d = pending.current
     if (!d) return
     pending.current = null
-    if (!store.save({ ...d, updatedAt: new Date().toISOString() })) setSaveFailed(true)
+    if (!store.save({ ...d, updatedAt: new Date().toISOString() })) return setSaveFailed(true)
+    setJustSaved(true)
+    clearTimeout(savedTimer.current)
+    savedTimer.current = setTimeout(() => setJustSaved(false), SAVED_HINT_MS)
   }, [])
   useEffect(() => {
     if (!doc) return
@@ -92,8 +128,23 @@ export function App() {
   }, [dirty])
 
   const download = useCallback(() => {
-    if (doc) dispatch({ type: 'saved', snapshot: downloadUserData(doc.data) })
-  }, [doc])
+    if (!doc) return
+    dispatch({ type: 'saved', snapshot: downloadUserData(doc.data) })
+    notify(`Đã tải xuống file JSON học kỳ ${doc.data.semester}`)
+  }, [doc, notify])
+
+  const canUndo = state.past.length > 0
+  const canRedo = state.future.length > 0
+  const undo = useCallback(() => {
+    if (!canUndo) return
+    dispatch({ type: 'undo' })
+    notify('Đã hoàn tác')
+  }, [canUndo, notify])
+  const redo = useCallback(() => {
+    if (!canRedo) return
+    dispatch({ type: 'redo' })
+    notify('Đã làm lại')
+  }, [canRedo, notify])
 
   // ---- Tải lên: chọn file hoặc kéo thả ----
   const readFile = useCallback(async (file: File) => {
@@ -169,16 +220,17 @@ export function App() {
       } else if (!typing && !dialogOpen) {
         if (key === 'z') {
           e.preventDefault()
-          dispatch({ type: e.shiftKey ? 'redo' : 'undo' })
+          if (e.shiftKey) redo()
+          else undo()
         } else if (key === 'y') {
           e.preventDefault()
-          dispatch({ type: 'redo' })
+          redo()
         }
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [download, doc])
+  }, [download, undo, redo, doc])
 
   // ---- Dữ liệu theo học kỳ ----
   const dataFor = (semester: string): UserData | null =>
@@ -205,11 +257,12 @@ export function App() {
           rubricId={resolveRubric(doc.data).id}
           dirty={dirty}
           semesters={semesters}
-          canUndo={state.past.length > 0}
-          canRedo={state.future.length > 0}
+          justSaved={justSaved}
+          canUndo={canUndo}
+          canRedo={canRedo}
           onSwitchSemester={openSemester}
-          onUndo={() => dispatch({ type: 'undo' })}
-          onRedo={() => dispatch({ type: 'redo' })}
+          onUndo={undo}
+          onRedo={redo}
           onDownload={download}
           onUpload={() => fileInput.current?.click()}
           onNew={() => setShowNew(true)}
@@ -225,28 +278,43 @@ export function App() {
         </div>
       )}
 
-      {!doc ? null : tab === 'status' ? (
-        <StatusScreen
-          data={doc.data}
-          onAddActivity={() => (window.location.hash = TAB_HASH.activities)}
-          onToggleExcluded={(id) =>
-            dispatch({
-              type: 'edit',
-              recipe: (d) => {
-                const list = d.excludedCriteria ?? []
-                return { ...d, excludedCriteria: list.includes(id) ? list.filter((x) => x !== id) : [...list, id] }
-              },
-            })
-          }
-        />
-      ) : tab === 'activities' ? (
-        <ActivitiesScreen
-          data={doc.data}
-          onEdit={(recipe) => dispatch({ type: 'edit', recipe })}
-          onUndo={() => dispatch({ type: 'undo' })}
-        />
-      ) : (
-        <SuggestScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} />
+      {doc && (
+        <>
+          {visited.has('status') && (
+            <div hidden={tab !== 'status'}>
+              <StatusScreen
+                data={doc.data}
+                onAddActivity={() => (window.location.hash = TAB_HASH.activities)}
+                onToggleExcluded={(id) => {
+                  const marking = !(doc.data.excludedCriteria ?? []).includes(id)
+                  dispatch({
+                    type: 'edit',
+                    recipe: (d) => {
+                      const list = d.excludedCriteria ?? []
+                      return { ...d, excludedCriteria: list.includes(id) ? list.filter((x) => x !== id) : [...list, id] }
+                    },
+                  })
+                  notify(marking ? `Đã đánh dấu ${id} không đạt` : `Đã bỏ đánh dấu ${id}`, { undo: true })
+                }}
+              />
+            </div>
+          )}
+          {visited.has('activities') && (
+            <div hidden={tab !== 'activities'}>
+              <ActivitiesScreen data={doc.data} onEdit={(recipe) => dispatch({ type: 'edit', recipe })} notify={notify} />
+            </div>
+          )}
+          {visited.has('suggest') && (
+            <div hidden={tab !== 'suggest'}>
+              <SuggestScreen
+                data={doc.data}
+                active={tab === 'suggest'}
+                onEdit={(recipe) => dispatch({ type: 'edit', recipe })}
+                notify={notify}
+              />
+            </div>
+          )}
+        </>
       )}
       {!doc && (
         <Welcome onUpload={() => fileInput.current?.click()} onNew={() => setShowNew(true)} />
@@ -285,11 +353,23 @@ export function App() {
           onConfirm={(data) => {
             setImportState(null)
             open({ data, savedSnapshot: serializeUserData(data) })
+            notify(`Đã mở dữ liệu học kỳ ${data.semester}`)
           }}
         />
       )}
 
       {showKeys && <ShortcutsDialog onClose={() => setShowKeys(false)} />}
+
+      {notice && (
+        <Toast
+          key={notice.key}
+          onDismiss={dismissNotice}
+          action={notice.undo ? { label: 'Hoàn tác', onClick: undo } : undefined}
+          duration={notice.undo ? 6000 : 2500}
+        >
+          {notice.message}
+        </Toast>
+      )}
 
       {showNew && (
         <NewDataDialog
@@ -302,6 +382,7 @@ export function App() {
           onCreate={(semester) => {
             setShowNew(false)
             open({ data: createEmptyUserData(semester), savedSnapshot: null })
+            notify(`Đã tạo dữ liệu học kỳ ${semester}`)
           }}
         />
       )}
