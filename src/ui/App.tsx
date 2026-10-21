@@ -198,7 +198,7 @@ export function App() {
   const storageWarning = !store.available || saveFailed
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-canvas text-fg">
       {doc && (
         <TopBar
           data={doc.data}
@@ -220,7 +220,7 @@ export function App() {
       )}
 
       {storageWarning && (
-        <div role="alert" className="bg-amber-100 px-4 py-2 text-center text-sm text-amber-900 dark:bg-amber-400/15 dark:text-amber-200">
+        <div role="alert" className="bg-planned-soft px-4 py-2 text-center text-sm text-planned-fg">
           ⚠ Trình duyệt không cho lưu bản nháp. Dữ liệu sẽ mất khi đóng tab, nhớ tải xuống.
         </div>
       )}
@@ -261,8 +261,8 @@ export function App() {
       />
 
       {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="rounded-xl border-2 border-dashed border-white px-8 py-6 text-lg font-medium text-white">
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-fg/50 p-4">
+          <div className="rounded-lg border-2 border-dashed border-canvas px-8 py-6 text-title text-canvas">
             Thả file JSON vào đây để tải lên
           </div>
         </div>

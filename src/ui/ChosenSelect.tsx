@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { rankChoices } from '../domain/optimizer.ts'
 import { rubricIndex } from '../domain/rubric.ts'
 import type { Activity, Rubric, UserData } from '../domain/types.ts'
+import { Select } from './kit/index.ts'
 
 interface Props {
   rubric: Rubric
@@ -28,12 +29,12 @@ export function ChosenSelect({ rubric, user, activity, value, onChange, excluded
   // gain của lựa chọn đang lưu luôn là 0 (so với chính nó): hiện "đang chọn" cho dễ hiểu
   const stored = user.activities.find((a) => a.id === activity.id)?.chosen ?? null
   return (
-    <select
+    <Select
       id={id}
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
       disabled={choices.length === 0 && value === null}
-      className={`rounded border border-slate-300 bg-white px-1.5 py-1 text-sm disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 ${className}`}
+      className={className}
     >
       <option value="">{choices.length === 0 ? '— Chọn tiêu chí có thể dùng trước —' : '— Chưa chọn —'}</option>
       {choices.map((c) => {
@@ -50,6 +51,6 @@ export function ChosenSelect({ rubric, user, activity, value, onChange, excluded
           {value} · {unknown ? 'không có trong rubric' : 'không nằm trong danh sách có thể dùng'}
         </option>
       )}
-    </select>
+    </Select>
   )
 }

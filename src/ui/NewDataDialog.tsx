@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { isSemester, rubricForSemester } from '../domain/rubric.ts'
 import type { UserData } from '../domain/types.ts'
 import { guessSemester } from '../storage.ts'
-import { btn, Dialog } from './Dialog.tsx'
+import { Dialog } from './Dialog.tsx'
+import { Button, fieldClass } from './kit/index.ts'
 
 interface Props {
   initialSemester?: string
@@ -36,34 +37,28 @@ export function NewDataDialog({ initialSemester, existing, onCreate, onOpenExist
             autoFocus
             aria-invalid={!valid}
             aria-describedby="semester-help"
-            className="mt-1 block w-32 rounded border border-slate-300 bg-transparent px-2 py-1 dark:border-slate-600"
+            className={`${fieldClass} mt-1 block w-32`}
           />
         </label>
-        <p id="semester-help" className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p id="semester-help" className="mt-1 text-sm text-fg-muted">
           {valid ? (
             <>Dùng rubric {rubricForSemester(semester).id}.</>
           ) : (
-            <span className="text-red-700 dark:text-red-300">Cần dạng năm.kỳ, ví dụ 2026.1 (kỳ 1–3).</span>
+            <span className="text-rejected-fg">Cần dạng năm.kỳ, ví dụ 2026.1 (kỳ 1–3).</span>
           )}
         </p>
         {found && (
-          <p className="mt-3 rounded-md bg-amber-50 p-2 text-sm text-amber-900 dark:bg-amber-400/10 dark:text-amber-200">
+          <p className="mt-3 rounded-md bg-planned-soft p-2 text-sm text-planned-fg">
             Học kỳ {semester} đã có dữ liệu ({found.activities.length} hoạt động). Tạo mới sẽ xoá dữ liệu đó, nên tải
             xuống trước nếu cần giữ lại.
           </p>
         )}
         <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <button type="button" className={btn.secondary} onClick={onClose}>
-            Huỷ
-          </button>
-          {found && (
-            <button type="button" className={btn.secondary} onClick={() => onOpenExisting(semester)}>
-              Mở dữ liệu đã có
-            </button>
-          )}
-          <button type="submit" className={btn.primary} disabled={!valid}>
+          <Button onClick={onClose}>Huỷ</Button>
+          {found && <Button onClick={() => onOpenExisting(semester)}>Mở dữ liệu đã có</Button>}
+          <Button type="submit" variant="primary" disabled={!valid}>
             {found ? 'Xoá và tạo mới' : 'Tạo'}
-          </button>
+          </Button>
         </div>
       </form>
     </Dialog>

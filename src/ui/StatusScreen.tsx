@@ -6,9 +6,8 @@ import { criterionInfo, fullAt, scoreNodes, type CriterionInfo } from '../domain
 import { resolveRubric } from '../domain/rubric.ts'
 import { computeScenarios, SCENARIO_KEYS, SCENARIOS, type ScenarioKey } from '../domain/scoring.ts'
 import type { Category, Criterion, Group, UserData } from '../domain/types.ts'
-import { btn } from './Dialog.tsx'
-import { StackedBar } from './StackedBar.tsx'
-import { SCENARIO_META, STATUS_META } from './status.ts'
+import { Badge, Button, Card, ProgressBar, StatusBadge } from './kit/index.ts'
+import { SCENARIO_META } from './status.ts'
 
 interface Props {
   data: UserData
@@ -50,14 +49,14 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-6">
       {data.activities.length === 0 && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-sky-50 p-4 text-sm text-sky-900 dark:bg-sky-400/10 dark:text-sky-100">
+        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-surface p-4 text-sm text-fg-muted">
           <span>
             Chưa có hoạt động nào. Thêm hoạt động đã làm hoặc định làm để xem điểm. Tiêu chí nào biết chắc không đạt
             được thì bấm vào nó ở cây chi tiết bên dưới để đánh dấu loại trừ.
           </span>
-          <button type="button" className={btn.primary} onClick={onAddActivity}>
+          <Button variant="primary" onClick={onAddActivity}>
             Thêm hoạt động
-          </button>
+          </Button>
         </div>
       )}
 
@@ -71,7 +70,7 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
             const score = scores[k].capped
             const next = nextGrade(score)
             return (
-              <div key={k} data-scenario={k} className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+              <Card key={k} data-scenario={k}>
                 <div className={`text-sm font-medium ${SCENARIO_META[k].text}`}>
                   <span aria-hidden>{SCENARIO_META[k].icon}</span> {SCENARIOS[k].label}
                 </div>
@@ -79,30 +78,28 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
                   <span data-testid="total" className="text-4xl font-semibold tabular-nums">
                     {score}
                   </span>
-                  <span className="text-slate-500 dark:text-slate-400">/ {rubric.totalMax}</span>
-                  <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-sm font-medium dark:bg-slate-800">
-                    {gradeOf(score).label}
-                  </span>
+                  <span className="text-fg-subtle">/ {rubric.totalMax}</span>
+                  <Badge className="ml-auto">{gradeOf(score).label}</Badge>
                 </div>
-                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <div className="mt-1 text-sm text-fg-subtle">
                   {next ? `Còn ${next.gap} điểm nữa lên ${next.grade.label}` : 'Đã đạt mức cao nhất'}
                 </div>
-              </div>
+              </Card>
             )
           })}
         </div>
-        <StackedBar values={values('total')} max={rubric.totalMax} className="mt-3 h-3" />
+        <ProgressBar values={values('total')} max={rubric.totalMax} size="md" className="mt-3" />
         <Legend />
       </section>
 
       {/* ---- Bảng theo mục lớn ---- */}
       <section aria-labelledby="theo-muc">
-        <h2 id="theo-muc" className="mb-2 font-semibold">
+        <h2 id="theo-muc" className="mb-2 text-heading">
           Theo mục
         </h2>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            <tr className="border-b border-border-strong text-left text-fg-subtle">
               <th className="py-1.5 font-normal">Mục</th>
               {SCENARIO_KEYS.map((k) => (
                 <th key={k} className={`w-10 whitespace-nowrap py-1.5 pl-2 text-right font-normal sm:w-32 ${SCENARIO_META[k].text}`} title={SCENARIOS[k].label}>
@@ -119,7 +116,7 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
               const v = values(cat.id)
               const penalty = cat.kind === 'penalty'
               return (
-                <tr key={cat.id} data-node={cat.id} className="border-b border-slate-100 align-top dark:border-slate-800">
+                <tr key={cat.id} data-node={cat.id} className="border-b border-border align-top">
                   <td className="py-2 pr-3">
                     <button
                       type="button"
@@ -134,14 +131,14 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
                     >
                       <span className="font-mono">{cat.id}</span>. {cat.name}
                     </button>
-                    <StackedBar values={v} max={cat.max} penalty={penalty} className="mt-1.5 h-2" />
+                    <ProgressBar values={v} max={cat.max} penalty={penalty} className="mt-1.5" />
                   </td>
                   {SCENARIO_KEYS.map((k) => (
                     <td key={k} data-scenario={k} className="py-2 text-right tabular-nums">
                       {v[k]}
                     </td>
                   ))}
-                  <td className="py-2 text-right tabular-nums text-slate-500 dark:text-slate-400">{cat.max}</td>
+                  <td className="py-2 text-right tabular-nums text-fg-subtle">{cat.max}</td>
                   <td className="hidden py-2 text-right tabular-nums sm:table-cell">{penalty ? '—' : cat.max - v.projected}</td>
                 </tr>
               )
@@ -153,7 +150,7 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
       {/* ---- Cây chi tiết ---- */}
       <section aria-labelledby="chi-tiet">
         <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2">
-          <h2 id="chi-tiet" className="font-semibold">
+          <h2 id="chi-tiet" className="text-heading">
             Chi tiết
           </h2>
           <label className="flex items-center gap-1.5 text-sm">
@@ -173,7 +170,7 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
             return (
               <details key={cat.id} id={`muc-${cat.id}`} open className="group/cat scroll-mt-28">
                 <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1 [&::-webkit-details-marker]:hidden">
-                  <span aria-hidden className="inline-block w-3 text-slate-400 transition-transform group-open/cat:rotate-90">
+                  <span aria-hidden className="inline-block w-3 text-fg-subtle transition-transform group-open/cat:rotate-90">
                     ▸
                   </span>
                   <h3 className="font-semibold">
@@ -183,12 +180,12 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
                   {!penalty && <Tags at={fullAt(nodes, cat.id)} wasted={wasted(cat.id)} />}
                 </summary>
                 {groups.length === 0 ? (
-                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Không có nhóm nào khớp bộ lọc.</p>
+                  <p className="mt-2 text-sm text-fg-subtle">Không có nhóm nào khớp bộ lọc.</p>
                 ) : (
                   <div className="mt-2 space-y-3">
                     {groups.map((g) => (
-                      <div key={g.id} data-node={g.id} className="rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div className="border-b border-slate-200 px-3 py-2 dark:border-slate-800">
+                      <Card key={g.id} data-node={g.id} padding="none" className="overflow-hidden">
+                        <div className="border-b border-border px-3 py-2">
                           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                             <h4 className="text-sm font-medium">
                               <span className="font-mono">{g.id}</span> {g.name}
@@ -196,9 +193,9 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
                             <Trio values={values(g.id)} max={g.max} />
                             {!penalty && <Tags at={fullAt(nodes, g.id)} wasted={wasted(g.id)} />}
                           </div>
-                          <StackedBar values={values(g.id)} max={g.max} penalty={penalty} className="mt-1.5 h-2" />
+                          <ProgressBar values={values(g.id)} max={g.max} penalty={penalty} className="mt-1.5" />
                         </div>
-                        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <ul className="divide-y divide-border">
                           {visibleCriteria(g).map((c) => (
                             <CriterionRow
                               key={c.id}
@@ -211,7 +208,7 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
                             />
                           ))}
                         </ul>
-                      </div>
+                      </Card>
                     ))}
                   </div>
                 )}
@@ -226,10 +223,10 @@ export function StatusScreen({ data, onToggleExcluded, onAddActivity }: Props) {
 
 function Legend() {
   return (
-    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-400">
+    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-muted">
       {SCENARIO_KEYS.map((k) => (
         <li key={k} className="flex items-center gap-1.5">
-          <span aria-hidden className={`inline-block h-2.5 w-5 rounded-sm ${SCENARIO_META[k].bar}`} />
+          <span aria-hidden className={`inline-block h-2 w-5 rounded-sm ${SCENARIO_META[k].bar}`} />
           {SCENARIO_META[k].icon} {k === 'confirmed' ? 'Đã xác nhận' : k === 'done' ? 'Đã tham gia, chờ xác nhận' : 'Dự định'}
         </li>
       ))}
@@ -247,7 +244,7 @@ function Trio({ values, max }: { values: Values; max: number }) {
           <span className="sr-only">{SCENARIOS[k].label}:</span> {values[k]}
         </span>
       ))}
-      <span className="text-slate-500 dark:text-slate-400">/ {max}</span>
+      <span className="text-fg-subtle">/ {max}</span>
     </span>
   )
 }
@@ -256,33 +253,25 @@ function Tags({ at, wasted }: { at: ScenarioKey | null; wasted: number }) {
   return (
     <>
       {at && (
-        <span
-          title={FULL_TITLE[at]}
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${
-            at === 'confirmed' ? STATUS_META.confirmed.badge : at === 'done' ? STATUS_META.joined.badge : STATUS_META.planned.badge
-          }`}
-        >
-          <span aria-hidden>{SCENARIO_META[at].icon}</span> Đầy<span className="sr-only">: {FULL_TITLE[at]}</span>
-        </span>
+        <Badge tone={SCENARIO_META[at].tone} icon={SCENARIO_META[at].icon} title={FULL_TITLE[at]}>
+          Đầy<span className="sr-only">: {FULL_TITLE[at]}</span>
+        </Badge>
       )}
       {wasted > 0 && (
-        <span
-          title="Tổng điểm các tiêu chí vượt trần (nếu làm hết kế hoạch). Nên chuyển bớt hoạt động sang nhóm khác."
-          className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-amber-400 dark:bg-amber-400/15 dark:text-amber-200 dark:ring-amber-400/40"
-        >
-          ⚠ phí {wasted} điểm
-        </span>
+        <Badge icon="⚠" title="Tổng điểm các tiêu chí vượt trần (nếu làm hết kế hoạch). Nên chuyển bớt hoạt động sang nhóm khác.">
+          phí {wasted} điểm
+        </Badge>
       )}
     </>
   )
 }
 
 const BORDER = {
-  confirmed: 'border-l-green-600 dark:border-l-green-500',
-  joined: 'border-l-blue-500 dark:border-l-blue-400',
-  planned: 'border-l-yellow-400 dark:border-l-yellow-300',
+  confirmed: 'border-l-confirmed-bar',
+  joined: 'border-l-joined-bar',
+  planned: 'border-l-planned-bar',
   rejected: 'border-l-transparent',
-  excluded: 'border-l-red-500 dark:border-l-red-400',
+  excluded: 'border-l-rejected-bar',
   none: 'border-l-transparent',
 }
 
@@ -306,15 +295,15 @@ function CriterionRow({ criterion: c, info, superseded, open, onToggleOpen, onTo
         aria-expanded={open}
         aria-controls={detailId}
         onClick={onToggleOpen}
-        className={`flex w-full items-start gap-2 border-l-4 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-900 ${BORDER[state]}`}
+        className={`flex w-full items-start gap-2 border-l-4 px-3 py-2 text-left hover:bg-surface ${BORDER[state]}`}
       >
         <StateChip state={state} />
         <span className="min-w-0 flex-1">
           <span className="text-sm">
-            <span className="font-mono text-slate-500 dark:text-slate-400">{c.id}</span> {c.name}
+            <span className="font-mono text-fg-subtle">{c.id}</span> {c.name}
           </span>
           {(info.chosenBy.length > 0 || info.elsewhere.length > 0 || superseded) && (
-            <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">
+            <span className="mt-0.5 block text-xs text-fg-muted">
               {info.chosenBy.length > 0 && <>← {info.chosenBy.map((a) => a.name).join(', ')}</>}
               {info.chosenBy.length > 1 && <> (trùng, chỉ tính 1 lần)</>}
               {superseded && <> · không tính vì đã có mức cao hơn</>}
@@ -323,7 +312,7 @@ function CriterionRow({ criterion: c, info, superseded, open, onToggleOpen, onTo
             </span>
           )}
         </span>
-        <span className={`shrink-0 text-sm tabular-nums ${info.excluded ? 'text-slate-400 line-through' : ''}`}>
+        <span className={`shrink-0 text-sm tabular-nums ${info.excluded ? 'text-fg-subtle line-through' : ''}`}>
           {c.points > 0 ? `+${c.points}` : `−${-c.points}`}
         </span>
       </button>
@@ -333,35 +322,35 @@ function CriterionRow({ criterion: c, info, superseded, open, onToggleOpen, onTo
 }
 
 function StateChip({ state }: { state: keyof typeof BORDER }) {
-  const base = 'mt-0.5 shrink-0 whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ring-1'
-  if (state === 'excluded') return <span className={`${base} ${STATUS_META.rejected.badge}`}>✕ Loại trừ</span>
+  if (state === 'excluded')
+    return (
+      <Badge tone="rejected" icon="✕" className="mt-0.5">
+        Loại trừ
+      </Badge>
+    )
   if (state === 'none' || state === 'rejected')
-    return <span className={`${base} text-slate-500 ring-slate-300 dark:text-slate-400 dark:ring-slate-700`}>· Trống</span>
-  return (
-    <span className={`${base} ${STATUS_META[state].badge}`}>
-      {STATUS_META[state].icon} {STATUS_META[state].label}
-    </span>
-  )
+    return (
+      <Badge icon="·" className="mt-0.5">
+        Trống
+      </Badge>
+    )
+  return <StatusBadge status={state} className="mt-0.5" />
 }
 
 function CriterionDetail({ id, info, onToggleExcluded }: { id: string; info: CriterionInfo; onToggleExcluded: () => void }) {
-  const btn =
-    'rounded-md px-2.5 py-1 text-sm font-medium ring-1 ring-slate-300 hover:bg-slate-100 disabled:opacity-40 dark:ring-slate-600 dark:hover:bg-slate-800'
   return (
-    <div id={id} className="space-y-2 bg-slate-50 px-3 py-3 pl-6 text-sm dark:bg-slate-900/60">
+    <div id={id} className="space-y-2 bg-surface px-3 py-3 pl-6 text-sm">
       {info.eligible.length === 0 ? (
-        <p className="text-slate-500 dark:text-slate-400">Chưa có hoạt động nào có thể dùng tiêu chí này.</p>
+        <p className="text-fg-subtle">Chưa có hoạt động nào có thể dùng tiêu chí này.</p>
       ) : (
         <div>
-          <div className="text-slate-500 dark:text-slate-400">Hoạt động có thể dùng:</div>
+          <div className="text-fg-subtle">Hoạt động có thể dùng:</div>
           <ul className="mt-1 space-y-1">
             {info.eligible.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center gap-2">
-                <span className={`rounded px-1.5 py-0.5 text-xs ring-1 ${STATUS_META[a.status].badge}`}>
-                  {STATUS_META[a.status].icon} {STATUS_META[a.status].label}
-                </span>
+                <StatusBadge status={a.status} />
                 <span>{a.name}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
+                <span className="text-xs text-fg-subtle">
                   {a.chosen === null ? 'chưa chọn tiêu chí' : info.chosenBy.includes(a) ? 'đang chọn tiêu chí này' : `đang chọn ${a.chosen}`}
                 </span>
               </li>
@@ -371,25 +360,25 @@ function CriterionDetail({ id, info, onToggleExcluded }: { id: string; info: Cri
       )}
       <div className="flex flex-wrap items-center gap-2">
         {info.excluded ? (
-          <button type="button" className={btn} onClick={onToggleExcluded}>
+          <Button size="sm" onClick={onToggleExcluded}>
             Bỏ loại trừ
-          </button>
+          </Button>
         ) : info.excludedOverridden ? (
           <>
-            <span className="text-slate-600 dark:text-slate-400">
+            <span className="text-fg-muted">
               Tiêu chí này nằm trong danh sách loại trừ nhưng đang được chọn nên vẫn được tính.
             </span>
-            <button type="button" className={btn} onClick={onToggleExcluded}>
+            <Button size="sm" onClick={onToggleExcluded}>
               Bỏ khỏi danh sách loại trừ
-            </button>
+            </Button>
           </>
         ) : (
           <>
-            <button type="button" className={btn} onClick={onToggleExcluded} disabled={info.chosenBy.length > 0}>
+            <Button size="sm" onClick={onToggleExcluded} disabled={info.chosenBy.length > 0}>
               ✕ Đánh dấu không đạt được
-            </button>
+            </Button>
             {info.chosenBy.length > 0 && (
-              <span className="text-slate-500 dark:text-slate-400">Đang có hoạt động chọn tiêu chí này.</span>
+              <span className="text-fg-subtle">Đang có hoạt động chọn tiêu chí này.</span>
             )}
           </>
         )}

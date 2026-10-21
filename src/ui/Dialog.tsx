@@ -12,21 +12,14 @@ export function Dialog({ title, onClose, children }: { title: string; onClose: (
       ref={ref}
       onClose={onClose}
       aria-labelledby="dialog-title"
-      className="m-auto w-[min(36rem,calc(100vw-2rem))] rounded-xl bg-white p-0 text-slate-900 shadow-xl backdrop:bg-black/40 dark:bg-slate-900 dark:text-slate-100"
+      className="m-auto w-[min(36rem,calc(100vw-2rem))] rounded-lg bg-canvas p-0 text-fg shadow-pop backdrop:bg-fg/40"
     >
       <div className="p-5">
-        <h2 id="dialog-title" className="text-lg font-semibold">
+        <h2 id="dialog-title" className="text-title">
           {title}
         </h2>
         <div className="mt-3">{children}</div>
       </div>
     </dialog>
   )
-}
-
-export const btn = {
-  primary:
-    'rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300',
-  secondary:
-    'rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100 disabled:opacity-40 dark:text-slate-200 dark:ring-slate-600 dark:hover:bg-slate-800',
 }

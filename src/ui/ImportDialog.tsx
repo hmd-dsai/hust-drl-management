@@ -1,7 +1,8 @@
 import { resolveRubric } from '../domain/rubric.ts'
 import { computeScenarios, SCENARIO_KEYS, SCENARIOS } from '../domain/scoring.ts'
 import type { UserData } from '../domain/types.ts'
-import { btn, Dialog } from './Dialog.tsx'
+import { Dialog } from './Dialog.tsx'
+import { Button } from './kit/index.ts'
 
 export type ImportState =
   | { kind: 'error'; fileName: string; errors: string[] }
@@ -25,17 +26,17 @@ export function ImportDialog({ state, current, hasOtherDraft, onConfirm, onClose
     const more = state.errors.length - shown.length
     return (
       <Dialog title={`Không đọc được file ${state.fileName}`} onClose={onClose}>
-        <ul className="max-h-72 list-disc space-y-1 overflow-auto pl-5 font-mono text-sm text-red-700 dark:text-red-300">
+        <ul className="max-h-72 list-disc space-y-1 overflow-auto pl-5 font-mono text-sm text-rejected-fg">
           {shown.map((e, i) => (
             <li key={i}>{e}</li>
           ))}
         </ul>
         {more > 0 && <p className="mt-1 text-sm">… và {more} lỗi khác.</p>}
-        <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">Dữ liệu hiện tại không bị thay đổi.</p>
+        <p className="mt-3 text-sm text-fg-muted">Dữ liệu hiện tại không bị thay đổi.</p>
         <div className="mt-4 flex justify-end">
-          <button type="button" className={btn.primary} onClick={onClose} autoFocus>
+          <Button variant="primary" onClick={onClose} autoFocus>
             Đóng
-          </button>
+          </Button>
         </div>
       </Dialog>
     )
@@ -59,7 +60,7 @@ export function ImportDialog({ state, current, hasOtherDraft, onConfirm, onClose
     <Dialog title={`Xem trước ${state.fileName}`} onClose={onClose}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 text-left dark:border-slate-700">
+          <tr className="border-b border-border-strong text-left">
             <th className="py-1 font-normal" />
             {cols.map((c) => (
               <th key={c.title} className="py-1 text-right font-medium">
@@ -70,8 +71,8 @@ export function ImportDialog({ state, current, hasOtherDraft, onConfirm, onClose
         </thead>
         <tbody>
           {rows.map(([label, get]) => (
-            <tr key={label} className="border-b border-slate-100 dark:border-slate-800">
-              <td className="py-1 text-slate-600 dark:text-slate-400">{label}</td>
+            <tr key={label} className="border-b border-border">
+              <td className="py-1 text-fg-muted">{label}</td>
               {cols.map((c) => (
                 <td key={c.title} className="py-1 text-right tabular-nums">
                   {get(c)}
@@ -81,23 +82,21 @@ export function ImportDialog({ state, current, hasOtherDraft, onConfirm, onClose
           ))}
         </tbody>
       </table>
-      <div className="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+      <div className="mt-3 space-y-1 text-sm text-fg-muted">
         {current && sameSemester && (
           <p>
             Dữ liệu học kỳ {data.semester} đang mở sẽ bị thay thế
-            {current.dirty && <strong className="text-amber-700 dark:text-amber-300">, kể cả các thay đổi chưa tải xuống</strong>}.
+            {current.dirty && <strong className="font-semibold text-planned-fg">, kể cả các thay đổi chưa tải xuống</strong>}.
           </p>
         )}
         {current && !sameSemester && <p>Dữ liệu học kỳ {current.data.semester} đang mở vẫn được giữ trong bản nháp.</p>}
         {hasOtherDraft && <p>Bản nháp học kỳ {data.semester} có sẵn trong trình duyệt sẽ bị thay thế.</p>}
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <button type="button" className={btn.secondary} onClick={onClose}>
-          Huỷ
-        </button>
-        <button type="button" className={btn.primary} onClick={() => onConfirm(data)} autoFocus>
+        <Button onClick={onClose}>Huỷ</Button>
+        <Button variant="primary" onClick={() => onConfirm(data)} autoFocus>
           {current && sameSemester ? 'Thay thế' : 'Mở'}
-        </button>
+        </Button>
       </div>
     </Dialog>
   )

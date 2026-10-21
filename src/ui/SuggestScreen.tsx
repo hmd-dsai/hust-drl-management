@@ -6,8 +6,8 @@ import { resolveRubric, rubricIndex } from '../domain/rubric.ts'
 import { SCENARIO_KEYS, SCENARIOS } from '../domain/scoring.ts'
 import type { UserData } from '../domain/types.ts'
 import { formatGain } from './ChosenSelect.tsx'
-import { btn } from './Dialog.tsx'
-import { SCENARIO_META, STATUS_META } from './status.ts'
+import { Badge, Button, Card, StatusBadge } from './kit/index.ts'
+import { SCENARIO_META, TONE } from './status.ts'
 
 interface Props {
   data: UserData
@@ -53,14 +53,14 @@ export function SuggestScreen({ data, onEdit }: Props) {
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-6">
       <section aria-labelledby="goi-y" className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 id="goi-y" className="font-semibold">
+          <h2 id="goi-y" className="text-heading">
             Gợi ý cách gán tiêu chí
           </h2>
-          <button type="button" className={btn.primary} onClick={() => run(data)} disabled={computing}>
+          <Button variant="primary" onClick={() => run(data)} disabled={computing}>
             {computing ? 'Đang tính…' : result ? 'Tính lại' : 'Tính gợi ý'}
-          </button>
+          </Button>
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-fg-muted">
           Tìm cách gán tiêu chí cho các hoạt động dự định và đã tham gia để điểm "Nếu làm hết kế hoạch" cao nhất, rồi đến
           điểm "Nếu đã tham gia được tính", và đổi ít nhất có thể. Hoạt động đã xác nhận, đã ghim hoặc không được thì
           giữ nguyên; tiêu chí bị loại trừ thì bỏ qua.
@@ -70,10 +70,10 @@ export function SuggestScreen({ data, onEdit }: Props) {
       </section>
 
       <section aria-labelledby="nhom-trong">
-        <h2 id="nhom-trong" className="font-semibold">
+        <h2 id="nhom-trong" className="text-heading">
           Nhóm còn trống
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Các nhóm còn lấy được nhiều điểm nhất nếu làm hết kế hoạch (đã tính trần nhóm, trần mục và tổng), kèm các tiêu
           chí còn trống ít điểm nhất — gợi ý loại hoạt động nên tìm tiếp.
         </p>
@@ -82,16 +82,14 @@ export function SuggestScreen({ data, onEdit }: Props) {
         ) : (
           <ul className="mt-3 grid gap-3 sm:grid-cols-2">
             {groups.slice(0, OPEN_GROUPS_SHOWN).map((g) => (
-              <li key={g.groupId} data-group={g.groupId} className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+              <Card as="li" key={g.groupId} data-group={g.groupId} padding="sm">
                 <div className="flex items-baseline gap-2">
                   <span className="text-sm font-medium">
                     <span className="font-mono">{g.groupId}</span> {index.get(g.groupId)!.node.name}
                   </span>
-                  <span className="ml-auto shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-900 dark:bg-green-400/15 dark:text-green-200">
-                    còn {g.room} điểm
-                  </span>
+                  <Badge className="ml-auto">còn {g.room} điểm</Badge>
                 </div>
-                <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                <ul className="mt-2 space-y-1 text-sm text-fg-muted">
                   {g.criteria.slice(0, CRITERIA_PER_GROUP).map((c) => (
                     <li key={c.id} className="flex gap-2">
                       <span className="shrink-0 tabular-nums">+{Math.min(c.points, g.room)}</span>
@@ -101,7 +99,7 @@ export function SuggestScreen({ data, onEdit }: Props) {
                     </li>
                   ))}
                 </ul>
-              </li>
+              </Card>
             ))}
           </ul>
         )}
@@ -122,8 +120,11 @@ function Result({ res, name, activity, onEdit }: ResultProps) {
   return (
     <div className="space-y-4">
       {res.method === 'greedy' && (
-        <p role="status" className="rounded-md bg-amber-50 p-2 text-sm text-amber-900 dark:bg-amber-400/10 dark:text-amber-200">
-          ⚠ Có quá nhiều cách gán nên đã dừng sau {res.nodes.toLocaleString('vi-VN')} bước và dùng cách tính gần đúng. Kết
+        <p role="status" className="text-sm text-fg-muted">
+          <span aria-hidden className={TONE.planned.fg}>
+            ⚠
+          </span>{' '}
+          Có quá nhiều cách gán nên đã dừng sau {res.nodes.toLocaleString('vi-VN')} bước và dùng cách tính gần đúng. Kết
           quả không tệ hơn hiện tại nhưng có thể chưa phải tốt nhất.
         </p>
       )}
@@ -132,47 +133,45 @@ function Result({ res, name, activity, onEdit }: ResultProps) {
         {SCENARIO_KEYS.map((k) => {
           const diff = res.after[k] - res.before[k]
           return (
-            <div key={k} data-scenario={k} className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+            <Card key={k} data-scenario={k} padding="sm">
               <dt className={`text-sm ${SCENARIO_META[k].text}`}>
                 <span aria-hidden>{SCENARIO_META[k].icon}</span> {SCENARIOS[k].label}
               </dt>
               <dd className="mt-1 text-2xl font-semibold tabular-nums">
                 {res.before[k]} → {res.after[k]}
-                {diff !== 0 && <span className="ml-2 text-base text-green-700 dark:text-green-400">({formatGain(diff)})</span>}
+                {diff !== 0 && <span className={`ml-2 text-base ${TONE.confirmed.fg}`}>({formatGain(diff)})</span>}
               </dd>
-            </div>
+            </Card>
           )
         })}
       </dl>
 
       {Object.keys(res.assignment).length === 0 ? (
-        <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+        <p className="rounded-md bg-surface p-3 text-sm text-fg-muted">
           Chưa có hoạt động nào để gợi ý. Chỉ hoạt động dự định hoặc đã tham gia (chưa ghim) mới được đổi tiêu chí; thêm
           chúng ở màn hình Hoạt động.
         </p>
       ) : res.changes.length === 0 ? (
-        <p className="rounded-md bg-green-50 p-3 text-sm text-green-900 dark:bg-green-400/10 dark:text-green-200">
+        <p className={`rounded-md p-3 text-sm ${TONE.confirmed.soft} ${TONE.confirmed.fg}`}>
           ✓ Cách gán hiện tại đã tốt nhất, không cần đổi gì.
         </p>
       ) : (
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-3">
             <h3 className="text-sm font-medium">{res.changes.length} thay đổi đề xuất</h3>
-            <button type="button" className={btn.primary} onClick={() => apply(res.changes)}>
+            <Button variant="primary" onClick={() => apply(res.changes)}>
               Áp dụng tất cả
-            </button>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Áp dụng xong vẫn hoàn tác được (Ctrl+Z).</span>
+            </Button>
+            <span className="text-xs text-fg-subtle">Áp dụng xong vẫn hoàn tác được (Ctrl+Z).</span>
           </div>
-          <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+          <Card as="ul" padding="none" className="divide-y divide-border">
             {res.changes.map((c) => {
               const a = activity(c.activityId)
               return (
                 <li key={c.activityId} data-change={c.activityId} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2">
                   <div className="min-w-48 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded px-1.5 py-0.5 text-xs ring-1 ${STATUS_META[a.status].badge}`}>
-                        {STATUS_META[a.status].icon} {STATUS_META[a.status].label}
-                      </span>
+                      <StatusBadge status={a.status} />
                       <span className="font-medium">{a.name}</span>
                     </div>
                     <div className="mt-1 text-sm">
@@ -183,18 +182,16 @@ function Result({ res, name, activity, onEdit }: ResultProps) {
                     className="w-28 text-right text-sm tabular-nums"
                     title="Điểm &quot;Nếu làm hết kế hoạch&quot; tăng thêm nếu chỉ áp dụng riêng dòng này"
                   >
-                    <span className={c.gain > 0 ? 'font-medium text-green-700 dark:text-green-400' : 'text-slate-500'}>
+                    <span className={c.gain > 0 ? `font-medium ${TONE.confirmed.fg}` : 'text-fg-subtle'}>
                       {formatGain(c.gain)} điểm
                     </span>
-                    {c.gain <= 0 && <div className="text-xs text-slate-500">cần đi cùng dòng khác</div>}
+                    {c.gain <= 0 && <div className="text-xs text-fg-subtle">cần đi cùng dòng khác</div>}
                   </div>
-                  <button type="button" className={btn.secondary} onClick={() => apply([c])}>
-                    Áp dụng
-                  </button>
+                  <Button onClick={() => apply([c])}>Áp dụng</Button>
                 </li>
               )
             })}
-          </ul>
+          </Card>
         </div>
       )}
     </div>
@@ -202,11 +199,11 @@ function Result({ res, name, activity, onEdit }: ResultProps) {
 }
 
 function Crit({ id, name, strong }: { id: string | null; name: string | null; strong?: boolean }) {
-  if (id === null) return <span className="text-slate-500">— không chọn —</span>
+  if (id === null) return <span className="text-fg-subtle">— không chọn —</span>
   return (
     <span title={name ?? undefined}>
-      <span className={`font-mono ${strong ? 'font-semibold' : 'text-slate-500 line-through decoration-slate-400'}`}>{id}</span>
-      <span className="hidden text-slate-500 sm:inline"> {name && name.length > 40 ? `${name.slice(0, 40)}…` : name}</span>
+      <span className={`font-mono ${strong ? 'font-semibold' : 'text-fg-subtle line-through decoration-fg-disabled'}`}>{id}</span>
+      <span className="hidden text-fg-subtle sm:inline"> {name && name.length > 40 ? `${name.slice(0, 40)}…` : name}</span>
     </span>
   )
 }

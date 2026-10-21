@@ -2,6 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { foldVietnamese } from '../domain/activities.ts'
 import { rubricIndex } from '../domain/rubric.ts'
 import type { Rubric } from '../domain/types.ts'
+import { Badge } from './kit/index.ts'
 
 const CODE_RE = /^[a-z]+\.[0-9]*(\.[a-z]*)?$/
 
@@ -38,9 +39,9 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
   }, [rubric, query])
 
   return (
-    <div className="rounded-md border border-slate-300 dark:border-slate-700">
+    <div className="rounded-md border border-border-strong bg-canvas">
       {selected.length > 0 && (
-        <ul aria-label="Đã chọn" className="flex flex-wrap gap-1 border-b border-slate-200 p-2 dark:border-slate-800">
+        <ul aria-label="Đã chọn" className="flex flex-wrap gap-1 border-b border-border p-2">
           {selected.map((id) => {
             const known = index.get(id)?.kind === 'criterion'
             return (
@@ -49,11 +50,10 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
                   type="button"
                   onClick={() => toggle(id)}
                   title={known ? `${index.get(id)!.node.name} — bấm để bỏ` : 'Không có trong rubric — bấm để bỏ'}
-                  className={`rounded px-1.5 py-0.5 font-mono text-xs ring-1 ${
-                    known ? 'bg-slate-100 ring-slate-300 dark:bg-slate-800 dark:ring-slate-600' : 'bg-red-100 text-red-900 ring-red-400 dark:bg-red-400/15 dark:text-red-200'
-                  }`}
                 >
-                  {id} ✕
+                  <Badge tone={known ? 'neutral' : 'rejected'} className="hover:opacity-80">
+                    {id} ✕
+                  </Badge>
                 </button>
               </li>
             )
@@ -68,23 +68,23 @@ export function CriterionPicker({ rubric, selected, onChange, excluded, autoFocu
         aria-label="Tìm tiêu chí"
         aria-controls={listId}
         autoFocus={autoFocus}
-        className="block w-full border-b border-slate-200 bg-transparent px-2 py-1.5 text-sm dark:border-slate-800"
+        className="block w-full border-b border-border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-fg-subtle"
       />
       <div id={listId} className="max-h-64 overflow-auto">
-        {sections.length === 0 && <p className="p-2 text-sm text-slate-500">Không tìm thấy tiêu chí nào.</p>}
+        {sections.length === 0 && <p className="p-2 text-sm text-fg-subtle">Không tìm thấy tiêu chí nào.</p>}
         {sections.map(({ cat, criteria }) => (
           <fieldset key={cat.id}>
-            <legend className="sticky top-0 w-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <legend className="sticky top-0 w-full bg-surface px-2.5 py-1 text-xs font-medium text-fg-muted">
               {cat.id}. {cat.name}
             </legend>
             {criteria.map((c) => (
-              <label key={c.id} className="flex cursor-pointer items-start gap-2 px-2 py-1 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">
+              <label key={c.id} className="flex cursor-pointer items-start gap-2 px-2.5 py-1 text-sm hover:bg-surface">
                 <input type="checkbox" checked={chosen.has(c.id)} onChange={() => toggle(c.id)} className="mt-1" />
                 <span className="min-w-0 flex-1">
-                  <span className="font-mono text-slate-500 dark:text-slate-400">{c.id}</span> {c.name}
-                  {excluded.has(c.id) && <span className="ml-1 text-xs text-red-700 dark:text-red-300">✕ đang loại trừ</span>}
+                  <span className="font-mono text-fg-subtle">{c.id}</span> {c.name}
+                  {excluded.has(c.id) && <span className="ml-1 text-xs text-rejected-fg">✕ đang loại trừ</span>}
                 </span>
-                <span className="shrink-0 tabular-nums text-slate-500">{c.points > 0 ? `+${c.points}` : c.points}</span>
+                <span className="shrink-0 tabular-nums text-fg-subtle">{c.points > 0 ? `+${c.points}` : c.points}</span>
               </label>
             ))}
           </fieldset>

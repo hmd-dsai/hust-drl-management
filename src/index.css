@@ -1,6 +1,83 @@
 @import "tailwindcss";
 
-/* Để ô chọn, ô nhập, thanh cuộn gốc của trình duyệt cũng theo nền sáng/tối của hệ điều hành. */
-:root {
-  color-scheme: light dark;
+/* Design tokens (docs/DESIGN.md mục 3). Component chỉ dùng các token này, không dùng thẳng slate-*, green-*… */
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Trung tính */
+  --color-canvas: #ffffff;
+  --color-surface: #f7f7f8;
+  --color-surface-selected: #f0f0f2;
+  --color-border: #ebebee;
+  --color-border-strong: #d4d4d8;
+  --color-track: #ededf0;
+  --color-fg: #18181b;
+  --color-fg-muted: #52525b;
+  --color-fg-subtle: #71717a;
+  --color-fg-disabled: #a1a1aa;
+  --color-accent: #18181b;
+  --color-accent-hover: #3f3f46;
+  --color-focus: #18181b;
+
+  /* Trạng thái: chữ (fg), thanh (bar), nền nhạt (soft) */
+  --color-planned-fg: #854d0e;
+  --color-planned-bar: #eab308;
+  --color-planned-soft: #fef9c3;
+  --color-planned-stripe: #fde68a;
+  --color-joined-fg: #1d4ed8;
+  --color-joined-bar: #3b82f6;
+  --color-joined-soft: #eff6ff;
+  --color-confirmed-fg: #15803d;
+  --color-confirmed-bar: #16a34a;
+  --color-confirmed-soft: #f0fdf4;
+  --color-rejected-fg: #b91c1c;
+  --color-rejected-bar: #dc2626;
+  --color-rejected-soft: #fef2f2;
+
+  /* Chữ */
+  --text-display: 48px;
+  --text-display--line-height: 52px;
+  --text-display--font-weight: 600;
+  --text-title: 20px;
+  --text-title--line-height: 28px;
+  --text-title--font-weight: 600;
+  --text-heading: 15px;
+  --text-heading--line-height: 22px;
+  --text-heading--font-weight: 600;
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-small: 13px;
+  --text-small--line-height: 18px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+
+  /* Bo góc, bóng */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --shadow-pop: 0 4px 16px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.04);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
 }

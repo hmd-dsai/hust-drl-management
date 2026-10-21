@@ -1,51 +1,53 @@
 import type { ScenarioKey } from '../domain/scoring.ts'
 import type { Status } from '../domain/types.ts'
 
-/** Nhãn, icon và màu cho từng trạng thái. Không dùng màu làm tín hiệu duy nhất: luôn kèm icon + chữ. */
-export const STATUS_META: Record<Status, { label: string; icon: string; badge: string }> = {
-  planned: {
-    label: 'Dự định',
-    icon: '○',
-    badge: 'bg-yellow-100 text-yellow-900 ring-yellow-400 dark:bg-yellow-400/15 dark:text-yellow-200 dark:ring-yellow-400/40',
-  },
-  joined: {
-    label: 'Đã tham gia',
-    icon: '◐',
-    badge: 'bg-blue-100 text-blue-900 ring-blue-400 dark:bg-blue-400/15 dark:text-blue-200 dark:ring-blue-400/40',
-  },
-  confirmed: {
-    label: 'Đã xác nhận',
-    icon: '✓',
-    badge: 'bg-green-100 text-green-900 ring-green-500 dark:bg-green-400/15 dark:text-green-200 dark:ring-green-400/40',
-  },
-  rejected: {
-    label: 'Không được',
-    icon: '✕',
-    badge: 'bg-red-100 text-red-900 ring-red-400 dark:bg-red-400/15 dark:text-red-200 dark:ring-red-400/40',
-  },
+/** Tông màu trạng thái (docs/DESIGN.md mục 3.2); `neutral` cho những thứ không phải trạng thái. */
+export type Tone = Status | 'neutral'
+
+/** Class theo token cho từng tông. Viết đủ tên class để Tailwind quét được. */
+export const TONE: Record<Tone, { fg: string; bar: string; soft: string }> = {
+  planned: { fg: 'text-planned-fg', bar: 'bg-planned-bar', soft: 'bg-planned-soft' },
+  joined: { fg: 'text-joined-fg', bar: 'bg-joined-bar', soft: 'bg-joined-soft' },
+  confirmed: { fg: 'text-confirmed-fg', bar: 'bg-confirmed-bar', soft: 'bg-confirmed-soft' },
+  rejected: { fg: 'text-rejected-fg', bar: 'bg-rejected-bar', soft: 'bg-rejected-soft' },
+  neutral: { fg: 'text-fg-muted', bar: 'bg-fg-subtle', soft: 'bg-surface-selected' },
 }
+
+/** Nhãn và icon cho từng trạng thái. Không dùng màu làm tín hiệu duy nhất: icon mỗi trạng thái một hình. */
+export const STATUS_META: Record<Status, { label: string; icon: string; tone: Status }> = {
+  planned: { label: 'Dự định', icon: '○', tone: 'planned' },
+  joined: { label: 'Đã tham gia', icon: '◐', tone: 'joined' },
+  confirmed: { label: 'Đã xác nhận', icon: '✓', tone: 'confirmed' },
+  rejected: { label: 'Không được', icon: '✕', tone: 'rejected' },
+}
+
+const PLANNED_STRIPES =
+  'bg-[repeating-linear-gradient(135deg,var(--color-planned-bar)_0_4px,var(--color-planned-stripe)_4px_8px)]'
 
 /**
  * Màu theo kịch bản cho thanh tiến độ xếp chồng: xanh lá (hiện tại) → xanh dương (đã tham gia) → vàng (kế hoạch).
  * Icon trùng với icon trạng thái tương ứng; phần kế hoạch có sọc để phân biệt cả khi không nhìn rõ màu.
  */
-export const SCENARIO_META: Record<ScenarioKey, { short: string; icon: string; bar: string; text: string }> = {
+export const SCENARIO_META: Record<ScenarioKey, { short: string; icon: string; tone: Status; bar: string; text: string }> = {
   confirmed: {
     short: 'Hiện tại',
     icon: STATUS_META.confirmed.icon,
-    bar: 'bg-green-600 dark:bg-green-500',
-    text: 'text-green-700 dark:text-green-400',
+    tone: 'confirmed',
+    bar: TONE.confirmed.bar,
+    text: TONE.confirmed.fg,
   },
   done: {
     short: 'Đã tham gia',
     icon: STATUS_META.joined.icon,
-    bar: 'bg-blue-500 dark:bg-blue-400',
-    text: 'text-blue-700 dark:text-blue-300',
+    tone: 'joined',
+    bar: TONE.joined.bar,
+    text: TONE.joined.fg,
   },
   projected: {
     short: 'Kế hoạch',
     icon: STATUS_META.planned.icon,
-    bar: 'bg-[repeating-linear-gradient(135deg,var(--color-yellow-400)_0_4px,var(--color-yellow-300)_4px_8px)] dark:bg-[repeating-linear-gradient(135deg,var(--color-yellow-300)_0_4px,var(--color-yellow-500)_4px_8px)]',
-    text: 'text-yellow-700 dark:text-yellow-300',
+    tone: 'planned',
+    bar: PLANNED_STRIPES,
+    text: TONE.planned.fg,
   },
 }

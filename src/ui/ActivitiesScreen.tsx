@@ -9,8 +9,8 @@ import { STATUSES, type Activity, type Rubric, type Status, type UserData } from
 import { validate, type Issue } from '../domain/validate.ts'
 import { ChosenSelect, formatGain } from './ChosenSelect.tsx'
 import { CriterionPicker } from './CriterionPicker.tsx'
-import { btn } from './Dialog.tsx'
-import { STATUS_META } from './status.ts'
+import { Button, Card, fieldClass, IconButton, Select } from './kit/index.ts'
+import { STATUS_META, TONE } from './status.ts'
 
 type Recipe = (d: UserData) => UserData
 
@@ -19,8 +19,7 @@ interface Props {
   onEdit: (recipe: Recipe) => void
 }
 
-const input =
-  'rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900'
+const input = fieldClass
 
 export function ActivitiesScreen({ data, onEdit }: Props) {
   const rubric = resolveRubric(data)
@@ -69,8 +68,8 @@ function AddForm({ rubric, data, excluded, onEdit }: { rubric: Rubric; data: Use
   }
 
   return (
-    <section aria-labelledby="them-hd" className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
-      <h2 id="them-hd" className="font-semibold">
+    <Card as="section" aria-labelledby="them-hd">
+      <h2 id="them-hd" className="text-heading">
         Thêm hoạt động
       </h2>
       <form
@@ -106,7 +105,7 @@ function AddForm({ rubric, data, excluded, onEdit }: { rubric: Rubric; data: Use
               className="w-full sm:w-auto sm:max-w-xl"
             />
             {chosen !== null && (
-              <span className={`text-sm font-medium ${gain > 0 ? 'text-green-700 dark:text-green-400' : 'text-slate-500'}`}>
+              <span className={`text-sm font-medium ${gain > 0 ? TONE.confirmed.fg : 'text-fg-subtle'}`}>
                 {formatGain(gain)} điểm nếu làm hết kế hoạch
               </span>
             )}
@@ -116,7 +115,7 @@ function AddForm({ rubric, data, excluded, onEdit }: { rubric: Rubric; data: Use
           <StatusRadio value={status} onChange={setStatus} name="hd-trang-thai" />
         </Field>
         <details className="text-sm">
-          <summary className="cursor-pointer text-slate-600 dark:text-slate-400">5. Ngày, link, ghi chú (không bắt buộc)</summary>
+          <summary className="cursor-pointer text-fg-muted">5. Ngày, link, ghi chú (không bắt buộc)</summary>
           <div className="mt-2 grid gap-2 sm:grid-cols-[10rem_1fr]">
             <input type="date" aria-label="Ngày" value={extra.date} onChange={(e) => setExtra({ ...extra, date: e.target.value })} className={input} />
             <input type="url" aria-label="Link" placeholder="Link" value={extra.link} onChange={(e) => setExtra({ ...extra, link: e.target.value })} className={input} />
@@ -130,11 +129,11 @@ function AddForm({ rubric, data, excluded, onEdit }: { rubric: Rubric; data: Use
             />
           </div>
         </details>
-        <button type="submit" className={btn.primary} disabled={!name.trim()}>
+        <Button type="submit" variant="primary" disabled={!name.trim()}>
           Thêm hoạt động
-        </button>
+        </Button>
       </form>
-    </section>
+    </Card>
   )
 }
 
@@ -144,7 +143,7 @@ function Field({ n, label, htmlFor, hint, children }: { n: number; label: string
       <label htmlFor={htmlFor} className="block text-sm font-medium">
         {n}. {label}
       </label>
-      {hint && <p className="text-xs text-slate-500 dark:text-slate-400">{hint}</p>}
+      {hint && <p className="text-xs text-fg-subtle">{hint}</p>}
       <div className="mt-1">{children}</div>
     </div>
   )
@@ -156,8 +155,8 @@ function StatusRadio({ value, onChange, name }: { value: Status; onChange: (s: S
       {STATUSES.map((s) => (
         <label
           key={s}
-          className={`cursor-pointer rounded-md px-2.5 py-1 text-sm ring-1 ${
-            value === s ? `${STATUS_META[s].badge} font-medium ring-2` : 'ring-slate-300 dark:ring-slate-600'
+          className={`cursor-pointer rounded-md border px-2.5 py-1 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus ${
+            value === s ? `border-transparent font-medium ${TONE[s].soft} ${TONE[s].fg}` : 'border-border-strong text-fg-muted hover:bg-surface'
           }`}
         >
           <input type="radio" name={name} value={s} checked={value === s} onChange={() => onChange(s)} className="sr-only" />
@@ -210,7 +209,7 @@ function ActivityList({ rubric, data, excluded, issues, onEdit }: ListProps) {
   return (
     <section aria-labelledby="ds-hd">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <h2 id="ds-hd" className="font-semibold">
+        <h2 id="ds-hd" className="text-heading">
           Hoạt động ({data.activities.length})
         </h2>
         <div role="group" aria-label="Lọc theo trạng thái" className="flex flex-wrap gap-1">
@@ -218,20 +217,23 @@ function ActivityList({ rubric, data, excluded, issues, onEdit }: ListProps) {
             Tất cả {data.activities.length}
           </FilterChip>
           {STATUSES.map((s) => (
-            <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)} className={filter === s ? STATUS_META[s].badge : ''}>
-              {STATUS_META[s].icon} {STATUS_META[s].label} {count(s)}
+            <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)}>
+              <span aria-hidden className={TONE[s].fg}>
+                {STATUS_META[s].icon}
+              </span>{' '}
+              {STATUS_META[s].label} {count(s)}
             </FilterChip>
           ))}
         </div>
         <label className="ml-auto flex items-center gap-1 text-sm">
           Sắp xếp
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className={input}>
+          <Select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
             {SORTS.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 
@@ -244,11 +246,11 @@ function ActivityList({ rubric, data, excluded, issues, onEdit }: ListProps) {
       )}
 
       {data.activities.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Chưa có hoạt động nào. Thêm hoạt động đầu tiên ở form phía trên.</p>
+        <p className="mt-4 text-sm text-fg-subtle">Chưa có hoạt động nào. Thêm hoạt động đầu tiên ở form phía trên.</p>
       ) : shown.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Không có hoạt động nào ở trạng thái này.</p>
+        <p className="mt-4 text-sm text-fg-subtle">Không có hoạt động nào ở trạng thái này.</p>
       ) : (
-        <ul className="mt-3 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+        <Card as="ul" padding="none" className="mt-3 divide-y divide-border overflow-hidden">
           {shown.map(({ a }) => (
             <ActivityRow
               key={a.id}
@@ -262,21 +264,19 @@ function ActivityList({ rubric, data, excluded, issues, onEdit }: ListProps) {
               onEdit={onEdit}
             />
           ))}
-        </ul>
+        </Card>
       )}
     </section>
   )
 }
 
-function FilterChip({ active, onClick, className = '', children }: { active: boolean; onClick: () => void; className?: string; children: ReactNode }) {
+function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`rounded-full px-2.5 py-0.5 text-sm ring-1 ${
-        active ? `font-medium ring-2 ${className || 'bg-slate-900 text-white ring-slate-900 dark:bg-slate-100 dark:text-slate-900'}` : 'ring-slate-300 dark:ring-slate-600'
-      }`}
+      className={`rounded-md px-2.5 py-1 text-sm ${active ? 'bg-surface-selected font-medium text-fg' : 'text-fg-muted hover:bg-surface hover:text-fg'}`}
     >
       {children}
     </button>
@@ -286,8 +286,10 @@ function FilterChip({ active, onClick, className = '', children }: { active: boo
 function IssueLine({ issue }: { issue: Issue }) {
   const warn = issue.severity === 'warning'
   return (
-    <li className={`flex gap-1.5 text-sm ${warn ? 'text-amber-800 dark:text-amber-300' : 'text-sky-800 dark:text-sky-300'}`}>
-      <span aria-hidden>{warn ? '⚠' : 'ℹ'}</span>
+    <li className="flex gap-1.5 text-sm text-fg-muted">
+      <span aria-hidden className={warn ? TONE.planned.fg : 'text-fg-subtle'}>
+        {warn ? '⚠' : 'ℹ'}
+      </span>
       <span>
         <span className="sr-only">{warn ? 'Cảnh báo: ' : 'Lưu ý: '}</span>
         {issue.message}
@@ -297,10 +299,10 @@ function IssueLine({ issue }: { issue: Issue }) {
 }
 
 const ROW_BORDER: Record<Status, string> = {
-  confirmed: 'border-l-green-600 dark:border-l-green-500',
-  joined: 'border-l-blue-500 dark:border-l-blue-400',
-  planned: 'border-l-yellow-400 dark:border-l-yellow-300',
-  rejected: 'border-l-red-500 dark:border-l-red-400',
+  confirmed: 'border-l-confirmed-bar',
+  joined: 'border-l-joined-bar',
+  planned: 'border-l-planned-bar',
+  rejected: 'border-l-rejected-bar',
 }
 
 interface RowProps {
@@ -321,24 +323,19 @@ function ActivityRow({ activity: a, rubric, data, excluded, issues, open, onTogg
   return (
     <li data-activity={a.id} className={`border-l-4 px-3 py-2 ${ROW_BORDER[a.status]}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={a.status}
-          aria-label="Trạng thái"
-          onChange={(e) => patch({ status: e.target.value as Status })}
-          className={`rounded px-1.5 py-1 text-sm ring-1 ${STATUS_META[a.status].badge}`}
-        >
+        <Select value={a.status} aria-label="Trạng thái" onChange={(e) => patch({ status: e.target.value as Status })} tone={a.status}>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
               {STATUS_META[s].icon} {STATUS_META[s].label}
             </option>
           ))}
-        </select>
+        </Select>
         <CommitInput
           value={a.name}
           aria-label="Tên hoạt động"
           required
           onCommit={(name) => patch({ name })}
-          className="min-w-40 flex-1 rounded border border-transparent bg-transparent px-1 py-1 font-medium hover:border-slate-300 focus:border-slate-400 dark:hover:border-slate-600"
+          className="min-w-40 flex-1 rounded-md border border-transparent bg-transparent px-1 py-1 font-medium hover:border-border-strong focus:border-fg-disabled"
         />
         {a.pinned && (
           <span title="Đã ghim: bộ gợi ý sẽ không đổi tiêu chí" className="text-sm">
@@ -354,26 +351,20 @@ function ActivityRow({ activity: a, rubric, data, excluded, issues, open, onTogg
           excluded={excluded}
           className="w-full max-w-full sm:w-64"
         />
-        <button type="button" aria-expanded={open} aria-controls={detailId} onClick={onToggleOpen} className={btn.secondary}>
+        <Button aria-expanded={open} aria-controls={detailId} onClick={onToggleOpen}>
           {open ? 'Xong' : 'Sửa'}
-        </button>
-        <button
-          type="button"
-          aria-label={`Xoá ${a.name}`}
-          title="Xoá (có thể hoàn tác)"
-          onClick={() => onEdit((d) => removeActivity(d, a.id))}
-          className="px-1 text-slate-400 hover:text-red-600"
-        >
+        </Button>
+        <IconButton label={`Xoá ${a.name}`} shortcut="hoàn tác được" onClick={() => onEdit((d) => removeActivity(d, a.id))} className="hover:text-rejected-fg">
           ✕
-        </button>
+        </IconButton>
       </div>
-      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 dark:text-slate-400">
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-muted">
         <span>
           Có thể dùng:{' '}
           {a.eligible.length === 0
             ? 'chưa có'
             : a.eligible.map((id) => (
-                <span key={id} title={index.get(id)?.node.name ?? 'Không có trong rubric'} className={`mr-1 font-mono ${id === a.chosen ? 'font-semibold text-slate-900 dark:text-slate-100' : ''}`}>
+                <span key={id} title={index.get(id)?.node.name ?? 'Không có trong rubric'} className={`mr-1 font-mono ${id === a.chosen ? 'font-semibold text-fg' : ''}`}>
                   {id}
                 </span>
               ))}
@@ -394,7 +385,7 @@ function ActivityRow({ activity: a, rubric, data, excluded, issues, open, onTogg
         </ul>
       )}
       {open && (
-        <div id={detailId} className="mt-3 space-y-3 rounded-md bg-slate-50 p-3 dark:bg-slate-900/60">
+        <div id={detailId} className="mt-3 space-y-3 rounded-md bg-surface p-3">
           <div>
             <div className="mb-1 text-sm font-medium">Tiêu chí có thể dùng</div>
             <CriterionPicker rubric={rubric} selected={a.eligible} onChange={(eligible) => patch({ eligible })} excluded={excluded} />

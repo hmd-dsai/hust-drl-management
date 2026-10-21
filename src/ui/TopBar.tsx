@@ -1,5 +1,5 @@
 import type { UserData } from '../domain/types.ts'
-import { btn } from './Dialog.tsx'
+import { Button, IconButton, Select } from './kit/index.ts'
 
 export type Tab = 'status' | 'activities' | 'suggest'
 
@@ -30,59 +30,50 @@ interface Props {
 /** Thanh trên cùng (SPEC mục 7.1). */
 export function TopBar(p: Props) {
   return (
-    <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+    <header className="sticky top-0 z-10 border-b border-border bg-canvas/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 whitespace-nowrap">
           <span className="font-semibold">ĐRL HUST</span>
           <label className="flex items-center gap-1 text-sm">
-            <span className="text-slate-500 dark:text-slate-400">Học kỳ</span>
+            <span className="text-fg-subtle">Học kỳ</span>
             {p.semesters.length > 1 ? (
-              <select
-                value={p.data.semester}
-                onChange={(e) => p.onSwitchSemester(e.target.value)}
-                className="rounded border border-slate-300 bg-transparent px-1 py-0.5 dark:border-slate-600"
-              >
+              <Select value={p.data.semester} onChange={(e) => p.onSwitchSemester(e.target.value)} className="h-7">
                 {p.semesters.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
                 ))}
-              </select>
+              </Select>
             ) : (
               <span className="font-medium">{p.data.semester}</span>
             )}
           </label>
-          <span className="text-sm text-slate-500 dark:text-slate-400">Rubric {p.rubricId}</span>
+          <span className="text-sm text-fg-subtle">Rubric {p.rubricId}</span>
           {p.dirty && (
             <span
-              className="flex items-center gap-1 text-sm text-amber-700 dark:text-amber-300"
+              className="flex items-center gap-1.5 text-sm text-fg-muted"
               title="Có thay đổi chưa tải xuống. Bản nháp vẫn được lưu trong trình duyệt, nhưng file JSON mới là bản lưu chính thức."
             >
-              <span aria-hidden className="size-2 rounded-full bg-amber-500" />
+              <span aria-hidden className="size-2 rounded-full bg-planned-bar" />
               Chưa tải xuống
             </span>
           )}
         </div>
-        <nav className="ml-auto flex flex-wrap items-center gap-2">
-          <button type="button" className={btn.secondary} onClick={p.onUndo} disabled={!p.canUndo} title="Hoàn tác (Ctrl+Z)">
-            ↶<span className="sr-only">Hoàn tác</span>
-          </button>
-          <button type="button" className={btn.secondary} onClick={p.onRedo} disabled={!p.canRedo} title="Làm lại (Ctrl+Shift+Z)">
-            ↷<span className="sr-only">Làm lại</span>
-          </button>
-          <button type="button" className={p.dirty ? btn.primary : btn.secondary} onClick={p.onDownload} title="Tải xuống (Ctrl+S)">
+        <nav className="ml-auto flex flex-wrap items-center gap-1">
+          <IconButton label="Hoàn tác" shortcut="Ctrl+Z" onClick={p.onUndo} disabled={!p.canUndo}>
+            ↶
+          </IconButton>
+          <IconButton label="Làm lại" shortcut="Ctrl+Shift+Z" onClick={p.onRedo} disabled={!p.canRedo}>
+            ↷
+          </IconButton>
+          <Button variant={p.dirty ? 'primary' : 'secondary'} onClick={p.onDownload} title="Tải xuống (Ctrl+S)" className="ml-1">
             Tải xuống
-          </button>
-          <button type="button" className={btn.secondary} onClick={p.onUpload}>
-            Tải lên
-          </button>
-          <button type="button" className={btn.secondary} onClick={p.onNew}>
-            Tạo dữ liệu mới
-          </button>
-          <button type="button" className={btn.secondary} onClick={p.onShortcuts} title="Phím tắt (?)">
-            <span aria-hidden>?</span>
-            <span className="sr-only">Phím tắt</span>
-          </button>
+          </Button>
+          <Button onClick={p.onUpload}>Tải lên</Button>
+          <Button onClick={p.onNew}>Tạo dữ liệu mới</Button>
+          <IconButton label="Phím tắt" shortcut="?" onClick={p.onShortcuts}>
+            ?
+          </IconButton>
         </nav>
       </div>
       <nav aria-label="Màn hình" className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4">
@@ -93,9 +84,7 @@ export function TopBar(p: Props) {
             aria-current={p.tab === t.id ? 'page' : undefined}
             onClick={() => p.onTab(t.id)}
             className={`-mb-px whitespace-nowrap border-b-2 px-3 py-1.5 text-sm font-medium ${
-              p.tab === t.id
-                ? 'border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              p.tab === t.id ? 'border-fg text-fg' : 'border-transparent text-fg-subtle hover:text-fg'
             }`}
           >
             {t.label}
